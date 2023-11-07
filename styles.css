@@ -1,0 +1,99 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid #ffffff; 
+    margin: 10px 0;
+}
+
+.audio-area{
+    display: flex;
+    height: 100vh;
+    justify-content: space-between;
+}
+
+#logo {
+    width: 120px;
+    height: 120px;
+    margin: 10px 10px 10 10;
+    background-color: black;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: white;
+    text-align: left;
+    font-size: 30px;
+}
+.audio-toolbar {
+    width: 200px;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 10px;
+    font-family: monospace;
+    font-size: xx-large;
+    display: flex;
+    flex-direction: column; /* Apila los elementos verticalmente */
+}
+
+.recent {
+    flex: 0 0 48%;
+    width: 100%;
+    background-color: #000000;
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+}
+
+.liked {
+    flex: 0 0 48%; 
+    width: 100%;
+    background-color: #000000;
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+}
+
+.audio-area {
+    background-color: #ffffff;
+    flex: 1;
+    display: flex;
+}
+
+.audio-recorder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    background-color: inherit;
+}
+
+.audio-player {
+    width: 350px;
+    text-align: center;
+    background-color: #dddddd;
+}
+
+#play-pause {
+    background-color: #000000;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 20px; /* Espacio entre el botón y el reproductor */
+}
+
+#seek-bar {
+    width: 100%;
+}
+
