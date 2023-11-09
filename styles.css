@@ -78,13 +78,15 @@ hr {
     background-color: inherit;
 }
 
-.audio-player {
+.audio-recorder{
     width: 350px;
     text-align: center;
-    background-color: #dddddd;
+    background-color: inherit;
 }
 
-#play-pause {
+button {
+    font-family: monospace;
+    border-radius: 3px;
     background-color: #000000;
     color: white;
     border: none;
@@ -93,7 +95,75 @@ hr {
     margin-top: 20px; /* Espacio entre el botón y el reproductor */
 }
 
+#recorded-time{
+    font-family: monospace;
+    font-size: 14px;
+    border: rgb(168, 6, 6) 2px solid;
+    height: 20px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    background-color: rgb(236, 78, 78);
+    color: #fff;
+}
+
+button:hover {
+    border: #000000 1px solid;
+    background-color: #dadada;
+    color: #000000;
+}
+
+button:disabled{
+    background-color: #424242;
+    color: #ffffff;
+}
+
+
 #seek-bar {
     width: 100%;
 }
 
+#audio {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Estilo base del checkbox */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Estilo del checkbox cuando está marcado */
+input[type="checkbox"]:checked {
+    background-color: inherit;
+    border-color: inherit; 
+}
+
+/* Estilo del contenedor del checkbox (puedes personalizar esto según tu diseño) */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    border: rgb(124, 214, 96) 2px solid;
+    border-radius: 5px;
+    width: auto;
+    color: #000000;
+    background-color: rgb(227, 255, 243);
+    font-family: monospace;
+}
+
+/* Estilo del texto junto al checkbox (puedes personalizar esto según tu diseño) */
+.checkbox-label {
+    margin-left: 10px;
+}
