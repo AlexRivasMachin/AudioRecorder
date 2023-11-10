@@ -29,7 +29,6 @@ recordButton.addEventListener('click', async () => {
             const audioUrl = URL.createObjectURL(audioBlob);
             audioPlayer.src = audioUrl;
             playButton.disabled = false;
-            // Detenemos el temporizador al finalizar la grabación
             stopTimer();
         };
 
@@ -50,7 +49,7 @@ stopButton.addEventListener('click', async () => {
         await mediaRecorder.stop();
         recordButton.disabled = false;
         stopButton.disabled = true;
-        // Detenemos el temporizador al presionar el botón de detener
+        // Detenemos el temporizador
         stopTimer();
     }
 });
@@ -65,7 +64,7 @@ playButton.addEventListener('click', () => {
 });
 
 function startTimer() {
-    // Inicia el temporizador y guarda la referencia al intervalo
+    // Inicia el temporizador
     timerInterval = setInterval(() => {
         timer.textContent = '0:00';
         if (mediaRecorder && mediaRecorder.state === 'recording') {
