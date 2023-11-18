@@ -5,6 +5,7 @@ const myCheckbox = document.getElementById('like');
 const recorder = document.getElementById('recorder-status');
 const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
+const recentList = document.getElementById('recent-list');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -90,15 +91,22 @@ async function startRecording() {
     }
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function stopRecording() {
     if (mediaRecorder && mediaRecorder.state === 'recording') {
         await mediaRecorder.stop();
+        // Si no espero un poco no actualiza la lista, no se porq falla el await anterior
+        await sleep(200);
         // Detenemos el temporizador
         stopTimer();
         if (audioChunks.length > 0) {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            lastAudios.push(audioBlob);
+            audioBlob.name = timer.textContent;
+            lastAudios.unshift(audioBlob);
+            updateLastRecordings();
         }
     }
 }
@@ -135,5 +143,20 @@ myCheckbox.addEventListener('change', () => {
 });
 
 function updateLastRecordings() {
-
+    try {
+        recentList.innerHTML = "";
+        lastAudios.forEach((audio) => {
+            const audioEntry = document.createElement('div');
+            audioEntry.setAttribute('class', 'audio-entry');
+            const play = document.createElement('img');
+            play.setAttribute('src', 'icons/play-audio-list.svg');
+            audioEntry.appendChild(play);
+            const name = document.createElement('p');
+            name.innerHTML = audio.name;
+            audioEntry.appendChild(name);
+            recentList.append(audioEntry);
+        });
+    } catch (error) {
+        console.error('Error updating last recordings:', error);
+    }
 }

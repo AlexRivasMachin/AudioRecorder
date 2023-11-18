@@ -120,6 +120,22 @@ hr {
   transition: 200ms;
 }
 
+.audio-entry {
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  img {
+    width: 10%;
+  }
+  p {
+    display: inline-block;
+    margin-left: 5%;
+    width: 80%;
+    height: 1em;
+  }
+}
+
 button {
   font-family: monospace;
   border-radius: 3px;
