@@ -1,7 +1,5 @@
-const playButton = document.getElementById('play');
 const audioPlayer = document.getElementById('audio');
 const timer = document.getElementById('timer');
-const myCheckbox = document.getElementById('like');
 const recorder = document.getElementById('recorder-status');
 const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
@@ -71,15 +69,6 @@ recorder.addEventListener('click', async () => {
     };
 });
 
-playButton.addEventListener('click', () => {
-    if (audioChunks.length > 0) {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        audioPlayer.src = audioUrl;
-        audioPlayer.play();
-    }
-});
-
 async function startRecording() {
     timer.textContent = '00:00:00';
     try {
@@ -98,7 +87,6 @@ async function startRecording() {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const audioUrl = URL.createObjectURL(audioBlob);
             audioPlayer.src = audioUrl;
-            playButton.disabled = false;
             stopTimer();
         };
 
@@ -153,14 +141,6 @@ function stopTimer() {
     // Detiene el temporizador
     clearInterval(timerInterval);
 }
-
-myCheckbox.addEventListener('change', () => {
-    if (myCheckbox.checked) {
-        console.log('Checkbox marcado');
-    } else {
-        console.log('Checkbox desmarcado');
-    }
-});
 
 function addToLastRecordings(audio) {
     try {
