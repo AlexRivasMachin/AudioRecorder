@@ -4,15 +4,18 @@
 <svg
    width="800px"
    height="800px"
-   viewBox="-1 0 8 8"
+   viewBox="0 0 24 24"
+   fill="none"
    version="1.1"
    id="svg1"
-   sodipodi:docname="pause.svg"
+   sodipodi:docname="play.svg"
    inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#505050"
@@ -23,28 +26,23 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
      inkscape:zoom="1.00625"
-     inkscape:cx="400"
-     inkscape:cy="400"
+     inkscape:cx="357.26708"
+     inkscape:cy="378.13665"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg1" />
-  <title
-     id="title1">pause [#1006]</title>
-  <desc
-     id="desc1">Created with Sketch.</desc>
-  <defs
-     id="defs1" />
   <circle
-     style="fill:#37c837;fill-opacity:1;stroke-width:0.0369107;paint-order:stroke fill markers"
+     style="fill:#37c837;fill-opacity:1;stroke-width:0.110732;paint-order:stroke fill markers"
      id="path3"
-     cx="3"
-     cy="4"
-     r="4" />
+     cx="12"
+     cy="12"
+     r="12" />
   <path
-     d="M 1.8,1.6 C 1.4688,1.6 1.2,1.8688 1.2,2.2 v 3.6 c 0,0.3312 0.2688,0.6 0.6,0.6 0.3312,0 0.6,-0.2688 0.6,-0.6 V 2.2 C 2.4,1.8688 2.1312,1.6 1.8,1.6 m 3,0.6 V 5.8 C 4.8,6.1312 4.5312,6.4 4.2,6.4 3.8688,6.4 3.6,6.1312 3.6,5.8 V 2.2 c 0,-0.3312 0.2688,-0.6 0.6,-0.6 0.3312,0 0.6,0.2688 0.6,0.6"
-     id="pause-[#1006]"
-     style="fill:#e2e2e2;fill-opacity:1;stroke-width:0.6" />
+     d="m 18.494891,10.643728 c 1.340145,0.728791 1.340145,2.615315 0,3.344093 l -8.091766,4.400268 C 9.10064,19.096404 7.5,18.174489 7.5,16.716049 V 7.915513 c 0,-1.4584528 1.60064,-2.3803421 2.903118,-1.6720525 z"
+     fill="#1C274C"
+     id="path1"
+     style="fill:#e2e2e2;fill-opacity:1;stroke-width:0.631578" />
 </svg>

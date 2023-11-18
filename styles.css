@@ -100,19 +100,35 @@ hr {
 .animated-button {
   padding: 17px 40px;
   border: 0;
-  background-color: rgb(255, 56, 86);
   letter-spacing: 1.5px;
   font-size: 15px;
   transition: all 0.3s ease;
-  box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
   color: hsl(0, 0%, 100%);
 }
 
-.animated-button:hover {
+.green-animated-button {
+  background-color: rgb(55, 200, 55);
+  box-shadow: rgb(37, 160, 42) 0px 10px 0px 0px;
+}
+
+.green-animated-button:active {
+  background-color: rgb(55, 200, 55);
+  /*50, 168, 80*/
+  box-shadow: rgb(37, 160, 42) 0px 0px 0px 0px;
+  transform: translateY(5px);
+  transition: 200ms;
+}
+
+.red-animated-button {
+  background-color: rgb(255, 56, 86);
+  box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
+}
+
+.red-animated-button:hover {
   box-shadow: rgb(201, 46, 70) 0px 7px 0px 0px;
 }
 
-.animated-button:active {
+.red-animated-button:active {
   background-color: rgb(255, 56, 86);
   /*50, 168, 80*/
   box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;

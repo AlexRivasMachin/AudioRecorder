@@ -17,6 +17,8 @@ let lastAudios = [];
 const recorderState = {
     Record: 'record button',
     Stop: 'stop button',
+    Play: 'play button',
+    Pause: 'pause button',
 }
 
 function getRecorderState() {
@@ -24,6 +26,8 @@ function getRecorderState() {
     switch (alt) {
         case 'record button': return recorderState.Record;
         case 'stop button': return recorderState.Stop;
+        case 'play button': return recorderState.Play;
+        case 'pause button': return recorderState.Pause;
         default: return null;
     }
 }
@@ -35,6 +39,8 @@ recorder.addEventListener('click', async () => {
             case recorderState.Record: {
                 recorder.setAttribute('src', "icons/stop.svg");
                 recorder.setAttribute('alt', recorderState.Stop);
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
                 timer.removeAttribute('class');
                 recordingImg.setAttribute('class', "parpadea");
                 await startRecording();
@@ -43,9 +49,15 @@ recorder.addEventListener('click', async () => {
             case recorderState.Stop: {
                 recorder.setAttribute('src', "icons/microphone.svg");
                 recorder.setAttribute('alt', recorderState.Record);
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
                 recordingImg.removeAttribute('class');
                 await stopRecording();
                 return;
+            };
+            case recorderState.Play: {
+                recorder.setAttribute('src', "icons/pause.svg");
+                recorder.setAttribute('alt', recorderState.Pause);
             };
         };
     };
@@ -105,9 +117,9 @@ async function stopRecording() {
         if (audioChunks.length > 0) {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             audioBlob.name = timer.textContent;
-            lastAudios.unshift(audioBlob);
-            updateLastRecordings();
+            addToLastRecordings(audioBlob);
         }
+        timer.textContent = "00:00:00";
     }
 }
 
@@ -142,21 +154,38 @@ myCheckbox.addEventListener('change', () => {
     }
 });
 
-function updateLastRecordings() {
+function addToLastRecordings(audio) {
     try {
-        recentList.innerHTML = "";
-        lastAudios.forEach((audio) => {
-            const audioEntry = document.createElement('div');
-            audioEntry.setAttribute('class', 'audio-entry');
-            const play = document.createElement('img');
-            play.setAttribute('src', 'icons/play-audio-list.svg');
-            audioEntry.appendChild(play);
-            const name = document.createElement('p');
-            name.innerHTML = audio.name;
-            audioEntry.appendChild(name);
-            recentList.append(audioEntry);
-        });
+        const audioEntry = document.createElement('div');
+        audioEntry.setAttribute('class', 'audio-entry');
+        const play = document.createElement('img');
+        play.setAttribute('src', 'icons/play-audio-list.svg');
+        play.setAttribute('class', 'play-button');
+        play.setAttribute('data-audio', audio);
+        audioEntry.appendChild(play);
+        const name = document.createElement('p');
+        name.innerHTML = audio.name;
+        audioEntry.appendChild(name);
+        recentList.append(audioEntry);
     } catch (error) {
         console.error('Error updating last recordings:', error);
     }
+}
+
+recentList.addEventListener('click', (e) => {
+    // Check if the clicked element is an img with the class play-button
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) {
+        const audioName = e.target.dataset.audio;
+        // Perform actions related to playing the audio (e.g., start playback)
+        enableAudioPlay(audioName)
+    }
+});
+
+function enableAudioPlay(audio) {
+    recorder.setAttribute('alt', recorderState.Play);
+    recorder.setAttribute('src', 'icons/play.svg');
+    recorder.removeAttribute('class');
+    recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+    audioPlayer.src = audio;
+    audioPlayer.play();
 }
