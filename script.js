@@ -58,6 +58,14 @@ recorder.addEventListener('click', async () => {
             case recorderState.Play: {
                 recorder.setAttribute('src', "icons/pause.svg");
                 recorder.setAttribute('alt', recorderState.Pause);
+                audioPlayer.play();
+                return;
+            };
+            case recorderState.Pause: {
+                recorder.setAttribute('src', "icons/play.svg");
+                recorder.setAttribute('alt', recorderState.Play);
+                audioPlayer.pause();
+                return;
             };
         };
     };
@@ -89,7 +97,6 @@ async function startRecording() {
         mediaRecorder.onstop = () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const audioUrl = URL.createObjectURL(audioBlob);
-            console.log(audioUrl);
             audioPlayer.src = audioUrl;
             playButton.disabled = false;
             stopTimer();
