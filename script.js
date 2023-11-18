@@ -89,6 +89,7 @@ async function startRecording() {
         mediaRecorder.onstop = () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const audioUrl = URL.createObjectURL(audioBlob);
+            console.log(audioUrl);
             audioPlayer.src = audioUrl;
             playButton.disabled = false;
             stopTimer();
@@ -161,7 +162,7 @@ function addToLastRecordings(audio) {
         const play = document.createElement('img');
         play.setAttribute('src', 'icons/play-audio-list.svg');
         play.setAttribute('class', 'play-button');
-        play.setAttribute('data-audio', audio);
+        play.setAttribute('data-audio', URL.createObjectURL(audio));
         audioEntry.appendChild(play);
         const name = document.createElement('p');
         name.innerHTML = audio.name;
@@ -175,17 +176,17 @@ function addToLastRecordings(audio) {
 recentList.addEventListener('click', (e) => {
     // Check if the clicked element is an img with the class play-button
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) {
-        const audioName = e.target.dataset.audio;
+        const audioUrl = e.target.dataset.audio;
         // Perform actions related to playing the audio (e.g., start playback)
-        enableAudioPlay(audioName)
+        enableAudioPlay(audioUrl);
     }
 });
 
-function enableAudioPlay(audio) {
+function enableAudioPlay(audioUrl) {
     recorder.setAttribute('alt', recorderState.Play);
     recorder.setAttribute('src', 'icons/play.svg');
     recorder.removeAttribute('class');
     recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
-    audioPlayer.src = audio;
-    audioPlayer.play();
+    audioPlayer.src = audioUrl;
+    recordingImg.setAttribute('src', 'icons/playing.svg');
 }
