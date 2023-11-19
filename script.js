@@ -31,41 +31,68 @@ function getRecorderState() {
     }
 }
 
+function setRecorderState(state) {
+    if (state != null) {
+        switch (state) {
+            case recorderState.Record: {
+                recorder.setAttribute('src', "icons/microphone.svg");
+                recorder.setAttribute('alt', state);
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
+                recordingImg.removeAttribute('class');
+                return;
+            };
+            case recorderState.Stop: {
+                recorder.setAttribute('src', "icons/stop.svg");
+                recorder.setAttribute('alt', state);
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
+                timer.removeAttribute('class');
+                recordingImg.setAttribute('class', "parpadea");
+                return;
+            };
+            case recorderState.Play: {
+                recorder.setAttribute('src', "icons/play.svg");
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+                recorder.setAttribute('alt', state);
+                recordingImg.removeAttribute('class');
+                return;
+            };
+            case recorderState.Pause: {
+                recorder.setAttribute('src', "icons/pause.svg");
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+                recorder.setAttribute('alt', state);
+                recordingImg.setAttribute('class', "parpadea");
+                return;
+            };
+        };
+    };
+}
+
 recorder.addEventListener('click', async () => {
     let state = getRecorderState();
     if (state != null) {
         switch (state) {
             case recorderState.Record: {
-                recorder.setAttribute('src', "icons/stop.svg");
-                recorder.setAttribute('alt', recorderState.Stop);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                timer.removeAttribute('class');
-                recordingImg.setAttribute('class', "parpadea");
+                setRecorderState(recorderState.Stop);
                 await startRecording();
                 return;
             };
             case recorderState.Stop: {
-                recorder.setAttribute('src', "icons/microphone.svg");
-                recorder.setAttribute('alt', recorderState.Record);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                recordingImg.removeAttribute('class');
+                setRecorderState(recorderState.Record);
                 await stopRecording();
                 return;
             };
             case recorderState.Play: {
-                recorder.setAttribute('src', "icons/pause.svg");
-                recorder.setAttribute('alt', recorderState.Pause);
-                recordingImg.setAttribute('class', "parpadea");
+                setRecorderState(recorderState.Pause);
                 updateTimerWhilePlaying();
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
-                recorder.setAttribute('src', "icons/play.svg");
-                recorder.setAttribute('alt', recorderState.Play);
-                recordingImg.removeAttribute('class');
+                setRecorderState(recorderState.Play);
                 stopTimer();
                 audioPlayer.pause();
                 return;
@@ -174,7 +201,6 @@ function addToLastRecordings(audio) {
 }
 
 recentList.addEventListener('click', (e) => {
-    // Check if the clicked element is an img with the class play-button
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) {
         const audioEntry = e.target.closest('.audio-entry');
         // Remove the 'playing' class from all audio entries
@@ -190,21 +216,19 @@ recentList.addEventListener('click', (e) => {
         const audioEntry = e.target.closest('.audio-entry');
         recordingImg.removeAttribute('class');
         audioEntry.parentNode.removeChild(audioEntry);
+        setRecorderState(recorderState.Record);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
         audioEntry.parentNode.removeChild(audioEntry);
         likedList.appendChild(audioEntry);
+        setRecorderState(recorderState.Record);
     }
 });
 
 function enableAudioPlay(audioUrl) {
-    recorder.setAttribute('alt', recorderState.Play);
-    recorder.setAttribute('src', 'icons/play.svg');
-    recorder.removeAttribute('class');
-    recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+    setRecorderState(recorderState.Play);
     audioPlayer.src = audioUrl;
-    recordingImg.setAttribute('src', 'icons/playing.svg');
 }
 
 function updateTimerWhilePlaying() {
