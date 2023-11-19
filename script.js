@@ -40,6 +40,7 @@ function setRecorderState(state) {
                 recorder.removeAttribute('class');
                 recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
                 recordingImg.removeAttribute('class');
+                recordingImg.setAttribute('src', "icons/recording.svg");
                 return;
             };
             case recorderState.Stop: {
@@ -57,6 +58,7 @@ function setRecorderState(state) {
                 recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
                 recorder.setAttribute('alt', state);
                 recordingImg.removeAttribute('class');
+                recordingImg.setAttribute('src', "icons/playing.svg");
                 return;
             };
             case recorderState.Pause: {
@@ -216,12 +218,16 @@ recentList.addEventListener('click', (e) => {
         const audioEntry = e.target.closest('.audio-entry');
         recordingImg.removeAttribute('class');
         audioEntry.parentNode.removeChild(audioEntry);
+        stopTimer();
+        timer.textContent = '00:00:00';
         setRecorderState(recorderState.Record);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
         audioEntry.parentNode.removeChild(audioEntry);
         likedList.appendChild(audioEntry);
+        stopTimer();
+        timer.textContent = '00:00:00';
         setRecorderState(recorderState.Record);
     }
 });
