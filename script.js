@@ -4,6 +4,7 @@ const recorder = document.getElementById('recorder-status');
 const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
+const likedList = document.getElementById('liked-list');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -189,6 +190,11 @@ recentList.addEventListener('click', (e) => {
         const audioEntry = e.target.closest('.audio-entry');
         recordingImg.removeAttribute('class');
         audioEntry.parentNode.removeChild(audioEntry);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        audioEntry.parentNode.removeChild(audioEntry);
+        likedList.appendChild(audioEntry);
     }
 });
 
