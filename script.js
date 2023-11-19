@@ -112,7 +112,10 @@ buttonRecordState.addEventListener('click', () => {
 });
 
 buttonSaveRecording.addEventListener('click', () => {
-    targetedAudioEntry = null;
+    if(targetedAudioEntry != null){
+        publishRecording(targetedAudioEntry);
+        targetedAudioEntry = null;
+    }
 });
 
 buttonDeleteRecording.addEventListener('click', () =>{
@@ -125,6 +128,14 @@ buttonDeleteRecording.addEventListener('click', () =>{
 function deleteRecording(audioEntry){
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
+    stopTimer();
+    timer.textContent = '00:00:00';
+    setRecorderState(recorderState.Record);
+}
+
+function publishRecording(audioEntry){
+    audioEntry.parentNode.removeChild(audioEntry);
+    likedList.appendChild(audioEntry);
     stopTimer();
     timer.textContent = '00:00:00';
     setRecorderState(recorderState.Record);
@@ -251,12 +262,9 @@ recentList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
-        audioEntry.parentNode.removeChild(audioEntry);
-        likedList.appendChild(audioEntry);
-        stopTimer();
-        timer.textContent = '00:00:00';
-        setRecorderState(recorderState.Record);
-        targetedAudioEntry = null;
+        if(audioEntry == targetedAudioEntry){
+            targetedAudioEntry = null;
+        }
     }
 });
 
