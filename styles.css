@@ -3,6 +3,23 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+
+  --dot-bg: rgb(247, 213, 213);
+  --dot-color: rgb(253, 105, 105);
+  --dot-size: 1.5px;
+  --dot-space: 22px;
+  background: linear-gradient(
+        90deg,
+        var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
+        transparent 1%
+      )
+      center / var(--dot-space) var(--dot-space),
+    linear-gradient(
+        var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
+        transparent 1%
+      )
+      center / var(--dot-space) var(--dot-space),
+    var(--dot-color);
 }
 
 ul {
@@ -21,6 +38,7 @@ hr {
   display: flex;
   height: 100vh;
   justify-content: space-between;
+  background-color: transparent;
 }
 
 #logo {
@@ -34,39 +52,58 @@ hr {
   text-align: left;
   font-size: 30px;
 }
+
+.audio-area p {
+  font-size: larger;
+  padding: 0px;
+}
+
 .audio-toolbar {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  margin-left: -10px;
+  font-family: sans-serif;
   width: 200px;
-  background-color: #000000;
+  background-color: #de3131;
   color: #ffffff;
-  padding: 10px;
-  font-family: monospace;
-  font-size: xx-large;
+  padding: 20px;
+  font-family: sans-serif;
   display: flex;
-  flex-direction: column; /* Apila los elementos verticalmente */
+  flex-direction: column;
 }
 
 .recent {
   flex: 0 0 48%;
   width: 100%;
-  background-color: #000000;
   font-size: 20px;
   margin: 0;
   padding: 0;
   color: #fff;
+}
+
+.recent p {
+  font-size: 18px;
+  padding: 0px;
+  font-weight: 600;
 }
 
 .liked {
   flex: 0 0 48%;
   width: 100%;
-  background-color: #000000;
-  font-size: 20px;
   margin: 0;
   padding: 0;
   color: #fff;
 }
 
+.liked p {
+  font-size: 18px;
+  padding: 0px;
+  font-weight: 700;
+}
+
 .audio-area {
-  background-color: #ffffff;
+  background-color: transparent;
   flex: 1;
   display: flex;
 }
