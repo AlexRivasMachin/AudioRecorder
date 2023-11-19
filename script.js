@@ -109,6 +109,7 @@ recorder.addEventListener('click', async () => {
 
 buttonRecordState.addEventListener('click', () => {
     setRecorderState(recorderState.Record);
+    targetedAudioEntry = null;
 });
 
 buttonSaveRecording.addEventListener('click', () => {
@@ -262,6 +263,7 @@ recentList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
+        publishRecording(audioEntry)
         if(audioEntry == targetedAudioEntry){
             targetedAudioEntry = null;
         }
