@@ -85,6 +85,73 @@ hr {
   background-color: inherit;
 }
 
+#recorder-status {
+  width: 250px;
+}
+
+.squared-button {
+  border-radius: 10px;
+}
+
+.rounded-button {
+  border-radius: 60%;
+}
+
+.animated-button {
+  padding: 17px 40px;
+  border: 0;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  color: hsl(0, 0%, 100%);
+}
+
+.green-animated-button {
+  background-color: rgb(55, 200, 55);
+  box-shadow: rgb(37, 160, 42) 0px 10px 0px 0px;
+}
+
+.green-animated-button:active {
+  background-color: rgb(55, 200, 55);
+  /*50, 168, 80*/
+  box-shadow: rgb(37, 160, 42) 0px 0px 0px 0px;
+  transform: translateY(5px);
+  transition: 200ms;
+}
+
+.red-animated-button {
+  background-color: rgb(255, 56, 86);
+  box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
+}
+
+.red-animated-button:hover {
+  box-shadow: rgb(201, 46, 70) 0px 7px 0px 0px;
+}
+
+.red-animated-button:active {
+  background-color: rgb(255, 56, 86);
+  /*50, 168, 80*/
+  box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;
+  transform: translateY(5px);
+  transition: 200ms;
+}
+
+.audio-entry {
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  img {
+    width: 10%;
+  }
+  p {
+    display: inline-block;
+    margin-left: 5%;
+    width: 80%;
+    height: 1em;
+  }
+}
+
 button {
   font-family: monospace;
   border-radius: 3px;
@@ -97,19 +164,14 @@ button {
 }
 
 #recorded-time {
-  font-family: monospace;
-  font-size: 14px;
-  border: rgb(168, 6, 6) 2px solid;
-  height: 20px;
-  width: 100%;
+  display: flex;
   margin-top: 10px;
-  padding: 5px;
   text-align: center;
   justify-content: center;
   align-items: center;
-  border-radius: 5px;
-  background-color: rgb(236, 78, 78);
-  color: #fff;
+  h2 {
+    margin-left: 20px;
+  }
 }
 
 button:hover {
@@ -144,26 +206,21 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* Estilo del checkbox cuando está marcado */
-input[type="checkbox"]:checked {
-  background-color: inherit;
-  border-color: inherit;
+@keyframes parpadeo {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-/* Estilo del contenedor del checkbox (puedes personalizar esto según tu diseño) */
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  border: rgb(124, 214, 96) 2px solid;
-  border-radius: 5px;
-  width: auto;
-  color: #000000;
-  background-color: rgb(227, 255, 243);
-  font-family: monospace;
-}
-
-/* Estilo del texto junto al checkbox (puedes personalizar esto según tu diseño) */
-.checkbox-label {
-  margin-left: 10px;
+.parpadea {
+  animation-name: parpadeo;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.25, 0.8, 0.1, 0.95);
+  animation-iteration-count: infinite;
 }

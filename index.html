@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <title>Editor de Código</title>
+    <title>Notas de voz</title>
   </head>
   <body>
     <section class="audio-area">
@@ -13,6 +13,7 @@
         <div class="recent">
           <hr />
           Audios guardados
+          <div id="recent-list"></div>
         </div>
         <ul id="Recent Records"></ul>
         <div class="liked">
@@ -22,15 +23,18 @@
       </div>
       <section class="audio-recorder">
         <div id="audio-recorder">
-          <button id="record">Grabar</button>
-          <button id="stop" disabled>Detener</button>
-          <button id="play" disabled>Reproducir</button>
-          <p id="recorded-time">Tiempo grabado: <span id="timer">0:00</span></p>
-          <audio id="audio" controls></audio>
-          <div class="checkbox-container">
-            <input type="checkbox" id="like" />
-            <label class="checkbox-label" for="like">Guardar</label>
+          <img
+            id="recorder-status"
+            class="animated-button red-animated-button rounded-button"
+            src="icons/microphone.svg"
+            alt="record button"
+          />
+          <hr />
+          <div id="recorded-time">
+            <img id="recording-img" src="icons/recording.svg" width="25px" />
+            <h2 id="timer">00:00:00</h2>
           </div>
+          <audio id="audio" controls></audio>
         </div>
       </section>
       <div id="logo">
