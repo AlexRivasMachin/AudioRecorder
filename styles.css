@@ -132,7 +132,14 @@ hr {
 .state-button {
   width: 100px;
   display: flex;
-  margin-bottom: 2em
+  margin-bottom: 2em;
+}
+
+.button-with-background{
+  background-color: #ff3856;
+  border-radius: 50%;
+  padding: 15%;
+  width: 70px;
 }
 
 #recorder-status {
