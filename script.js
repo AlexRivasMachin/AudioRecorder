@@ -113,20 +113,20 @@ buttonRecordState.addEventListener('click', () => {
 });
 
 buttonSaveRecording.addEventListener('click', () => {
-    if(targetedAudioEntry != null){
+    if (targetedAudioEntry != null) {
         publishRecording(targetedAudioEntry);
         targetedAudioEntry = null;
     }
 });
 
-buttonDeleteRecording.addEventListener('click', () =>{
-    if(targetedAudioEntry != null){
+buttonDeleteRecording.addEventListener('click', () => {
+    if (targetedAudioEntry != null) {
         deleteRecording(targetedAudioEntry);
         targetedAudioEntry = null;
     }
 });
 
-function deleteRecording(audioEntry){
+function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
     stopTimer();
@@ -134,7 +134,7 @@ function deleteRecording(audioEntry){
     setRecorderState(recorderState.Record);
 }
 
-function publishRecording(audioEntry){
+function publishRecording(audioEntry) {
     audioEntry.parentNode.removeChild(audioEntry);
     likedList.appendChild(audioEntry);
     stopTimer();
@@ -185,7 +185,7 @@ async function stopRecording() {
         stopTimer();
         if (audioChunks.length > 0) {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioBlob.name = timer.textContent;
+            audioBlob.name = new Date().toUTCString().slice(5, 16);
             addToLastRecordings(audioBlob);
         }
         timer.textContent = "00:00:00";
@@ -225,6 +225,7 @@ function addToLastRecordings(audio) {
         play.setAttribute('data-audio', URL.createObjectURL(audio));
         audioEntry.appendChild(play);
         const name = document.createElement('p');
+        name.setAttribute('class', 'audio-name');
         name.innerHTML = audio.name;
         audioEntry.appendChild(name);
         const publish = document.createElement('img');
@@ -242,7 +243,7 @@ function addToLastRecordings(audio) {
 }
 
 recentList.addEventListener('click', (e) => {
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) {
+    if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
         // Remove the 'playing' class from all audio entries
         document.querySelectorAll('.audio-entry').forEach(entry => {
@@ -257,14 +258,14 @@ recentList.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
         const audioEntry = e.target.closest('.audio-entry');
         deleteRecording(audioEntry);
-        if(audioEntry == targetedAudioEntry){
+        if (audioEntry == targetedAudioEntry) {
             targetedAudioEntry = null;
         }
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
         publishRecording(audioEntry)
-        if(audioEntry == targetedAudioEntry){
+        if (audioEntry == targetedAudioEntry) {
             targetedAudioEntry = null;
         }
     }

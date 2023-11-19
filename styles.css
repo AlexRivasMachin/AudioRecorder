@@ -83,7 +83,7 @@ hr {
 }
 
 .recent p {
-  font-size: 18px;
+  font-size: 16px;
   padding: 0px;
   font-weight: 600;
 }
@@ -109,14 +109,12 @@ hr {
 }
 
 .audio-recorder-section {
-  
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   background-color: inherit;
   gap: 3em;
-  
 }
 
 .audio-recorder {
@@ -125,7 +123,7 @@ hr {
   background-color: inherit;
 }
 
-.status-buttons{
+.status-buttons {
   display: flex;
 }
 
@@ -135,7 +133,7 @@ hr {
   margin-bottom: 2em;
 }
 
-.button-with-background{
+.button-with-background {
   background-color: #ff3856;
   border-radius: 50%;
   padding: 15%;
@@ -180,7 +178,6 @@ hr {
   background-color: rgb(255, 56, 86);
   box-shadow: rgb(201, 46, 70) 0px 10px 0px 0px;
 }
-
 
 .red-animated-button:hover {
   box-shadow: rgb(201, 46, 70) 0px 7px 0px 0px;
