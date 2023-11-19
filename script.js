@@ -4,6 +4,7 @@ const recorder = document.getElementById('recorder-status');
 const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
+const likedList = document.getElementById('liked-list');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -30,38 +31,69 @@ function getRecorderState() {
     }
 }
 
+function setRecorderState(state) {
+    if (state != null) {
+        switch (state) {
+            case recorderState.Record: {
+                recorder.setAttribute('src', "icons/microphone.svg");
+                recorder.setAttribute('alt', state);
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
+                recordingImg.removeAttribute('class');
+                return;
+            };
+            case recorderState.Stop: {
+                recorder.setAttribute('src', "icons/stop.svg");
+                recorder.setAttribute('alt', state);
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
+                timer.removeAttribute('class');
+                recordingImg.setAttribute('class', "parpadea");
+                return;
+            };
+            case recorderState.Play: {
+                recorder.setAttribute('src', "icons/play.svg");
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+                recorder.setAttribute('alt', state);
+                recordingImg.removeAttribute('class');
+                return;
+            };
+            case recorderState.Pause: {
+                recorder.setAttribute('src', "icons/pause.svg");
+                recorder.removeAttribute('class');
+                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+                recorder.setAttribute('alt', state);
+                recordingImg.setAttribute('class', "parpadea");
+                return;
+            };
+        };
+    };
+}
+
 recorder.addEventListener('click', async () => {
     let state = getRecorderState();
     if (state != null) {
         switch (state) {
             case recorderState.Record: {
-                recorder.setAttribute('src', "icons/stop.svg");
-                recorder.setAttribute('alt', recorderState.Stop);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                timer.removeAttribute('class');
-                recordingImg.setAttribute('class', "parpadea");
+                setRecorderState(recorderState.Stop);
                 await startRecording();
                 return;
             };
             case recorderState.Stop: {
-                recorder.setAttribute('src', "icons/microphone.svg");
-                recorder.setAttribute('alt', recorderState.Record);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                recordingImg.removeAttribute('class');
+                setRecorderState(recorderState.Record);
                 await stopRecording();
                 return;
             };
             case recorderState.Play: {
-                recorder.setAttribute('src', "icons/pause.svg");
-                recorder.setAttribute('alt', recorderState.Pause);
+                setRecorderState(recorderState.Pause);
+                updateTimerWhilePlaying();
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
-                recorder.setAttribute('src', "icons/play.svg");
-                recorder.setAttribute('alt', recorderState.Play);
+                setRecorderState(recorderState.Play);
+                stopTimer();
                 audioPlayer.pause();
                 return;
             };
@@ -121,8 +153,8 @@ async function stopRecording() {
 
 function startTimer() {
     // Inicia el temporizador
+    timer.textContent = '00:00:00';
     timerInterval = setInterval(() => {
-        timer.textContent = '00:00:00';
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             const currentTime = new Date().getTime();
             const elapsedTime = Math.floor((currentTime - startTime) / 1000);
@@ -154,6 +186,14 @@ function addToLastRecordings(audio) {
         const name = document.createElement('p');
         name.innerHTML = audio.name;
         audioEntry.appendChild(name);
+        const publish = document.createElement('img');
+        publish.setAttribute('src', 'icons/cloud-upload.svg');
+        publish.setAttribute('class', 'publish-button');
+        audioEntry.appendChild(publish);
+        const remove = document.createElement('img');
+        remove.setAttribute('src', 'icons/delete.svg');
+        remove.setAttribute('class', 'remove-button');
+        audioEntry.appendChild(remove);
         recentList.append(audioEntry);
     } catch (error) {
         console.error('Error updating last recordings:', error);
@@ -161,19 +201,47 @@ function addToLastRecordings(audio) {
 }
 
 recentList.addEventListener('click', (e) => {
-    // Check if the clicked element is an img with the class play-button
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        // Remove the 'playing' class from all audio entries
+        document.querySelectorAll('.audio-entry').forEach(entry => {
+            entry.classList.remove('playing');
+        });
+        audioEntry.classList.add('playing');
         const audioUrl = e.target.dataset.audio;
-        // Perform actions related to playing the audio (e.g., start playback)
+        recordingImg.removeAttribute('class');
         enableAudioPlay(audioUrl);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        recordingImg.removeAttribute('class');
+        audioEntry.parentNode.removeChild(audioEntry);
+        setRecorderState(recorderState.Record);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        audioEntry.parentNode.removeChild(audioEntry);
+        likedList.appendChild(audioEntry);
+        setRecorderState(recorderState.Record);
     }
 });
 
 function enableAudioPlay(audioUrl) {
-    recorder.setAttribute('alt', recorderState.Play);
-    recorder.setAttribute('src', 'icons/play.svg');
-    recorder.removeAttribute('class');
-    recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
+    setRecorderState(recorderState.Play);
     audioPlayer.src = audioUrl;
-    recordingImg.setAttribute('src', 'icons/playing.svg');
+}
+
+function updateTimerWhilePlaying() {
+    timer.textContent = '00:00:00';
+    // Inicia el temporizador
+    timerInterval = setInterval(() => {
+        const elapsedTime = Math.floor(audioPlayer.currentTime);
+        const hours = Math.floor(elapsedTime / 3600);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
+        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        const formattedHours = hours < 10 ? `0${hours}` : hours;
+        timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    }, 100);
 }
