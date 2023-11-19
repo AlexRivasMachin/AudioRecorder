@@ -56,12 +56,16 @@ recorder.addEventListener('click', async () => {
             case recorderState.Play: {
                 recorder.setAttribute('src', "icons/pause.svg");
                 recorder.setAttribute('alt', recorderState.Pause);
+                recordingImg.setAttribute('class', "parpadea");
+                updateTimerWhilePlaying();
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
                 recorder.setAttribute('src', "icons/play.svg");
                 recorder.setAttribute('alt', recorderState.Play);
+                recordingImg.removeAttribute('class');
+                stopTimer();
                 audioPlayer.pause();
                 return;
             };
@@ -121,8 +125,8 @@ async function stopRecording() {
 
 function startTimer() {
     // Inicia el temporizador
+    timer.textContent = '00:00:00';
     timerInterval = setInterval(() => {
-        timer.textContent = '00:00:00';
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             const currentTime = new Date().getTime();
             const elapsedTime = Math.floor((currentTime - startTime) / 1000);
@@ -176,4 +180,19 @@ function enableAudioPlay(audioUrl) {
     recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
     audioPlayer.src = audioUrl;
     recordingImg.setAttribute('src', 'icons/playing.svg');
+}
+
+function updateTimerWhilePlaying() {
+    timer.textContent = '00:00:00';
+    // Inicia el temporizador
+    timerInterval = setInterval(() => {
+        const elapsedTime = Math.floor(audioPlayer.currentTime);
+        const hours = Math.floor(elapsedTime / 3600);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
+        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        const formattedHours = hours < 10 ? `0${hours}` : hours;
+        timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    }, 100);
 }
