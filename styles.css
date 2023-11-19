@@ -174,19 +174,33 @@ hr {
 }
 
 .audio-entry {
-  height: 40px;
+  height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 5px;
+  padding: 5px;
+  border: 1px;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #de3131;
   img {
-    width: 10%;
+    height: 100%;
+    margin-right: 5%;
   }
   p {
     display: inline-block;
-    margin-left: 5%;
     width: 80%;
     height: 1em;
   }
+}
+
+.audio-entry:hover {
+  border-color: var(--dot-color);
+}
+
+.audio-entry.playing {
+  border-color: var(--dot-bg);
 }
 
 button {

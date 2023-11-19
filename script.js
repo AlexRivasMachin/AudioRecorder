@@ -158,6 +158,14 @@ function addToLastRecordings(audio) {
         const name = document.createElement('p');
         name.innerHTML = audio.name;
         audioEntry.appendChild(name);
+        const publish = document.createElement('img');
+        publish.setAttribute('src', 'icons/cloud-upload.svg');
+        publish.setAttribute('class', 'publish-button');
+        audioEntry.appendChild(publish);
+        const remove = document.createElement('img');
+        remove.setAttribute('src', 'icons/delete.svg');
+        remove.setAttribute('class', 'remove-button');
+        audioEntry.appendChild(remove);
         recentList.append(audioEntry);
     } catch (error) {
         console.error('Error updating last recordings:', error);
@@ -167,9 +175,20 @@ function addToLastRecordings(audio) {
 recentList.addEventListener('click', (e) => {
     // Check if the clicked element is an img with the class play-button
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        // Remove the 'playing' class from all audio entries
+        document.querySelectorAll('.audio-entry').forEach(entry => {
+            entry.classList.remove('playing');
+        });
+        audioEntry.classList.add('playing');
         const audioUrl = e.target.dataset.audio;
-        // Perform actions related to playing the audio (e.g., start playback)
+        recordingImg.removeAttribute('class');
         enableAudioPlay(audioUrl);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        recordingImg.removeAttribute('class');
+        audioEntry.parentNode.removeChild(audioEntry);
     }
 });
 
