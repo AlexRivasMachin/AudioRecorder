@@ -6,14 +6,15 @@ const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const likedList = document.getElementById('liked-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
-const buttonSaveRecording = document.getElementById('imageSaveRecording');
-const buttonDeleteRecording = document.getElementById('imageSaveRecording');
+const buttonSaveRecording = document.getElementById('imageSaveRedocrding');
+const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
 
 let mediaRecorder;
 let audioChunks = [];
 let startTime;
 let timerInterval;
 let lastAudios = [];
+let targetedAudioEntry = null;
 
 // Mapping image alt with their state
 const recorderState = {
@@ -109,6 +110,25 @@ recorder.addEventListener('click', async () => {
 buttonRecordState.addEventListener('click', () => {
     setRecorderState(recorderState.Record);
 });
+
+buttonSaveRecording.addEventListener('click', () => {
+    targetedAudioEntry = null;
+});
+
+buttonDeleteRecording.addEventListener('click', () =>{
+    if(targetedAudioEntry != null){
+        deleteRecording(targetedAudioEntry);
+        targetedAudioEntry = null;
+    }
+});
+
+function deleteRecording(audioEntry){
+    recordingImg.removeAttribute('class');
+    audioEntry.parentNode.removeChild(audioEntry);
+    stopTimer();
+    timer.textContent = '00:00:00';
+    setRecorderState(recorderState.Record);
+}
 
 async function startRecording() {
     timer.textContent = '00:00:00';
@@ -220,14 +240,14 @@ recentList.addEventListener('click', (e) => {
         const audioUrl = e.target.dataset.audio;
         recordingImg.removeAttribute('class');
         enableAudioPlay(audioUrl);
+        targetedAudioEntry = audioEntry;
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
         const audioEntry = e.target.closest('.audio-entry');
-        recordingImg.removeAttribute('class');
-        audioEntry.parentNode.removeChild(audioEntry);
-        stopTimer();
-        timer.textContent = '00:00:00';
-        setRecorderState(recorderState.Record);
+        deleteRecording(audioEntry);
+        if(audioEntry == targetedAudioEntry){
+            targetedAudioEntry = null;
+        }
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
@@ -236,8 +256,10 @@ recentList.addEventListener('click', (e) => {
         stopTimer();
         timer.textContent = '00:00:00';
         setRecorderState(recorderState.Record);
+        targetedAudioEntry = null;
     }
 });
+
 
 function enableAudioPlay(audioUrl) {
     setRecorderState(recorderState.Play);
