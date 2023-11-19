@@ -5,6 +5,9 @@ const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const likedList = document.getElementById('liked-list');
+const buttonRecordState = document.getElementById('imageBackToRecording');
+const buttonSaveRecording = document.getElementById('imageSaveRecording');
+const buttonDeleteRecording = document.getElementById('imageSaveRecording');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -101,6 +104,10 @@ recorder.addEventListener('click', async () => {
             };
         };
     };
+});
+
+buttonRecordState.addEventListener('click', () => {
+    setRecorderState(recorderState.Record);
 });
 
 async function startRecording() {
