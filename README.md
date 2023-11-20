@@ -1,6 +1,5 @@
 # AudioRecorder
-## AUTHORS:
-### BY Sertis:
+## BY Sertis:
 + AlexRivasMachín 🌶️
 + gomezBc 🥥
 + MartinLopezDeIpina 🍍
