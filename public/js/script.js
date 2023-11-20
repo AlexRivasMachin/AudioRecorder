@@ -13,7 +13,7 @@ let mediaRecorder;
 let audioChunks = [];
 let startTime;
 let timerInterval;
-let lastAudios = [];
+let audioIndex = 0;
 
 // Mapping image alt with their state
 const recorderState = {
@@ -113,10 +113,12 @@ buttonRecordState.addEventListener('click', () => {
 
 buttonSaveRecording.addEventListener('click', () => {
     publishRecording(document.querySelectorAll('.playing')[0]);
+    document.querySelectorAll('.playing')[0].classList.remove('playing');
 });
 
 buttonDeleteRecording.addEventListener('click', () => {
     deleteRecording(document.querySelectorAll('.playing')[0]);
+    document.querySelectorAll('.playing')[0].classList.remove('playing');
 });
 
 function deleteRecording(audioEntry) {
@@ -178,7 +180,7 @@ async function stopRecording() {
         stopTimer();
         if (audioChunks.length > 0) {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioBlob.name = new Date().toUTCString().slice(5, 16);
+            audioBlob.name = new Date().toUTCString().slice(4, 22);
             addToLastRecordings(audioBlob);
         }
         timer.textContent = "00:00:00";
