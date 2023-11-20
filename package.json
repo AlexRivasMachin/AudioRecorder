@@ -1,21 +1,22 @@
 {
-  "name": "prac",
+  "name": "AudioRecorder",
   "version": "1.0.0",
   "description": "",
-  "main": "script.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlexRivasMachin/Prac.git"
+    "url": "git+https://github.com/AlexRivasMachin/AudioRecorder.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AlexRivasMachin/Prac/issues"
+    "url": "https://github.com/AlexRivasMachin/AudioRecorder/issues"
   },
-  "homepage": "https://github.com/AlexRivasMachin/Prac#readme",
+  "homepage": "https://github.com/AlexRivasMachin/AudioRecorder#readme",
   "dependencies": {
     "express": "^4.18.2"
   }
