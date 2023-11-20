@@ -4,7 +4,7 @@ body {
   padding: 0;
   overflow: hidden;
 
-  --dot-bg: rgb(247, 213, 213);
+  --dot-bg: #e2e2e2;
   --dot-color: rgb(253, 105, 105);
   --dot-size: 1.5px;
   --dot-space: 22px;
