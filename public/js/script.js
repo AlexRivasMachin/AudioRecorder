@@ -38,45 +38,45 @@ function getRecorderState() {
 }
 
 function setRecorderState(state) {
-    if (state != null) { 
-        switch (state) {
-            case recorderState.Record: {
-                recorder.setAttribute('src', "icons/microphone.svg");
-                recorder.setAttribute('alt', state);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                recordingImg.removeAttribute('class');
-                recordingImg.setAttribute('src', "icons/recording.svg");
-                return;
-            };
-            case recorderState.Stop: {
-                recorder.setAttribute('src', "icons/stop.svg");
-                recorder.setAttribute('alt', state);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                timer.removeAttribute('class');
-                recordingImg.setAttribute('class', "parpadea");
-                return;
-            };
-            case recorderState.Play: {
-                recorder.setAttribute('src', "icons/play.svg");
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
-                recorder.setAttribute('alt', state);
-                recordingImg.removeAttribute('class');
-                recordingImg.setAttribute('src', "icons/playing.svg");
-                return;
-            };
-            case recorderState.Pause: {
-                recorder.setAttribute('src', "icons/pause.svg");
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
-                recorder.setAttribute('alt', state);
-                recordingImg.setAttribute('class', "parpadea");
-                return;
-            };
-        };
-    };
+    if (state == null) { 
+        return;
+    }
+
+    recordingImg.removeAttribute('class');
+
+    switch (state) {
+
+        case recorderState.Record: 
+            changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
+            break;
+        case recorderState.Stop:
+            changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
+            break;
+        case recorderState.Play:
+            changeRecorderButtonAndRecordingImgAppearence(state, 'play', 'green', 'playing', 'normal');
+            break;
+        case recorderState.Pause:
+            changeRecorderButtonAndRecordingImgAppearence(state, 'pause', 'green', 'playing', 'parpadea');
+            break;
+    }
+}
+function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, color, imgIcon, imgClass){
+    changeRecorderButtonAppareance(state, recorderIcon, color);
+    changeRecordingImgAppareance(imgIcon, imgClass);
+}
+
+function changeRecorderButtonAppareance(state, icon, color){
+    recorder.setAttribute('src', `icons/${icon}.svg`);
+    recorder.setAttribute('alt', state);
+    recorder.removeAttribute('class');
+    recorder.classList.add('animated-button', `${color}-animated-button`, 'rounded-button');
+}
+
+function changeRecordingImgAppareance(icon, imgClass){
+    recordingImg.setAttribute('src', `icons/${icon}.svg`);
+    if(imgClass == "parpadea"){
+        recordingImg.setAttribute('class', "parpadea");
+    }
 }
 
 recorder.addEventListener('click', async () => {
