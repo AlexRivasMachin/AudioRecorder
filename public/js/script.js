@@ -109,20 +109,41 @@ recorder.addEventListener('click', async () => {
     };
 });
 
+
 buttonRecordState.addEventListener('click', () => {
     setRecorderState(recorderState.Record);
-    document.querySelectorAll('.playing')[0].classList.remove('playing');
+    if(existsAudioWithPlayingClass()){
+        removeAudioWithPlayingClass();
+    }
 });
 
 buttonSaveRecording.addEventListener('click', () => {
-    publishRecording(document.querySelectorAll('.playing')[0]);
-    document.querySelectorAll('.playing')[0].classList.remove('playing');
+    if(existsAudioWithPlayingClass()){
+        publishRecording(getAudiosWithPlayingClass()[0]);
+        removeAudioWithPlayingClass();
+    }
 });
 
 buttonDeleteRecording.addEventListener('click', () => {
-    deleteRecording(document.querySelectorAll('.playing')[0]);
-    document.querySelectorAll('.playing')[0].classList.remove('playing');
+    if(existsAudioWithPlayingClass()){
+        deleteRecording(document.querySelectorAll('.playing')[0]);
+        removeAudioWithPlayingClass();
+    }
 });
+
+function existsAudioWithPlayingClass(){
+    return getAudiosWithPlayingClass().length > 0;
+}
+
+function removeAudioWithPlayingClass(){
+    getAudiosWithPlayingClass().forEach(audio => {
+        audio.classList.remove('playing');
+    })
+}
+
+function getAudiosWithPlayingClass(){
+    return document.querySelectorAll('.playing');
+}
 
 function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
