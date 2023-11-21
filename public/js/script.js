@@ -14,9 +14,6 @@ const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
 
 let mediaRecorder;
 let audioChunks = [];
-let startTime;
-let timerInterval;
-let audioIndex = 0;
 let uuid;
 
 // Mapping image alt with their state

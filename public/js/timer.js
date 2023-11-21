@@ -1,12 +1,11 @@
-class Timer{
+class Timer{    
+    htmlElement;
+    interval;
+    startTime;
 
     constructor(htmlElement){
         this.htmlElement = htmlElement;
     }
-
-    htmlElement;
-    interval;
-    startTime;
 
     reloadTimer(){
         this.setTextContent('00:00:00');
@@ -19,7 +18,6 @@ class Timer{
     startTimer() {
         this.reloadTimer();
         this.startTime = new Date().getTime();
-
         this.createInterval(false);
     }
 
@@ -29,7 +27,6 @@ class Timer{
 
     createInterval(isContinue, audioPlayer){
         this.interval = setInterval(() => {
-
             let currentTime;
             let elapsedTime;
             if(isContinue){
