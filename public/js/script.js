@@ -1,7 +1,8 @@
 import uuidv4 from '../utils/uuid/v4.js';
+import Timer from './timer.js';
 
 const audioPlayer = document.getElementById('audio');
-const timer = document.getElementById('timer');
+const timer2 = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
 const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
@@ -85,23 +86,26 @@ recorder.addEventListener('click', async () => {
         switch (state) {
             case recorderState.Record: {
                 setRecorderState(recorderState.Stop);
+                timer2.startTimer();
                 await startRecording();
                 return;
             };
             case recorderState.Stop: {
                 setRecorderState(recorderState.Record);
+                timer2.stopTimer();
+                timer2.reloadTimer();
                 await stopRecording();
                 return;
             };
             case recorderState.Play: {
                 setRecorderState(recorderState.Pause);
-                updateTimerWhilePlaying();
+                timer2.continueTimer(audioPlayer);
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
                 setRecorderState(recorderState.Play);
-                stopTimer();
+                timer2.stopTimer();
                 audioPlayer.pause();
                 return;
             };
@@ -148,26 +152,24 @@ function getAudiosWithPlayingClass(){
 function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
-    stopTimer();
-    timer.textContent = '00:00:00';
+    timer2.stopTimer(); 
+    timer2.reloadTimer();
     setRecorderState(recorderState.Record);
 }
 
 function publishRecording(audioEntry) {
     audioEntry.parentNode.removeChild(audioEntry);
     likedList.appendChild(audioEntry);
-    stopTimer();
-    timer.textContent = '00:00:00';
+    timer2.stopTimer();
+    timer2.reloadTimer();
     setRecorderState(recorderState.Record);
 }
 
 async function startRecording() {
-    timer.textContent = '00:00:00';
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
-        startTime = new Date().getTime();
 
         mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
@@ -179,13 +181,10 @@ async function startRecording() {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const audioUrl = URL.createObjectURL(audioBlob);
             audioPlayer.src = audioUrl;
-            stopTimer();
         };
 
         mediaRecorder.start();
 
-        // Iniciamos el temporizador
-        startTimer();
     } catch (error) {
         console.error('Error al acceder al micrófono:', error);
     }
@@ -199,40 +198,17 @@ async function stopRecording() {
     if (mediaRecorder && mediaRecorder.state === 'recording') {
         await mediaRecorder.stop();
         // Si no espero un poco no actualiza la lista, no se porq falla el await anterior
-        await sleep(200);
-        // Detenemos el temporizador
-        stopTimer();
+        await sleep(30);
+        // Detenemo el temporizador
         if (audioChunks.length > 0) {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             audioBlob.name = new Date().toUTCString().slice(4, 22);
             addToLastRecordings(audioBlob);
         }
-        timer.textContent = "00:00:00";
     }
 }
 
-function startTimer() {
-    // Inicia el temporizador
-    timer.textContent = '00:00:00';
-    timerInterval = setInterval(() => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            const currentTime = new Date().getTime();
-            const elapsedTime = Math.floor((currentTime - startTime) / 1000);
-            const hours = Math.floor(elapsedTime / 3600);
-            const minutes = Math.floor(elapsedTime / 60);
-            const seconds = elapsedTime % 60;
-            const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-            const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-            const formattedHours = hours < 10 ? `0${hours}` : hours;
-            timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-        }
-    }, 1000);
-}
 
-function stopTimer() {
-    // Detiene el temporizador
-    clearInterval(timerInterval);
-}
 
 function addToLastRecordings(audio) {
     try {
@@ -264,6 +240,13 @@ function addToLastRecordings(audio) {
 recentList.addEventListener('click', (e) => {
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
+
+        timer2.stopTimer();
+        timer2.reloadTimer();
+
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+        }
+
         // Remove the 'playing' class from all audio entries
         document.querySelectorAll('.audio-entry').forEach(entry => {
             entry.classList.remove('playing');
@@ -289,21 +272,6 @@ function enableAudioPlay(audioUrl) {
     audioPlayer.src = audioUrl;
 }
 
-function updateTimerWhilePlaying() {
-    timer.textContent = '00:00:00';
-    // Inicia el temporizador
-    timerInterval = setInterval(() => {
-        const elapsedTime = Math.floor(audioPlayer.currentTime);
-        const hours = Math.floor(elapsedTime / 3600);
-        const minutes = Math.floor(elapsedTime / 60);
-        const seconds = elapsedTime % 60;
-        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-        const formattedHours = hours < 10 ? `0${hours}` : hours;
-        timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-    }, 100);
-}
-
 if (!localStorage.getItem("uuid")){
 
     localStorage.setItem("uuid", uuidv4()); // genera y gaurda el uuid
@@ -311,5 +279,4 @@ if (!localStorage.getItem("uuid")){
 } // si no está almacenado en localStorage
 
 uuid = localStorage.getItem("uuid"); // logra el uuid desdelocalStorage
-//print pa ver el uuid
 console.log(uuid);
