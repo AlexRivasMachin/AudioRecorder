@@ -126,7 +126,7 @@ buttonSaveRecording.addEventListener('click', () => {
 
 buttonDeleteRecording.addEventListener('click', () => {
     if(existsAudioWithPlayingClass()){
-        deleteRecording(document.querySelectorAll('.playing')[0]);
+        deleteRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
     }
 });
