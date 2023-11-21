@@ -1,3 +1,5 @@
+import uuidv4 from '../utils/uuid/v4.js';
+
 const audioPlayer = document.getElementById('audio');
 const timer = document.getElementById('timer');
 const recorder = document.getElementById('recorder-status');
@@ -14,6 +16,7 @@ let audioChunks = [];
 let startTime;
 let timerInterval;
 let audioIndex = 0;
+let uuid;
 
 // Mapping image alt with their state
 const recorderState = {
@@ -35,7 +38,7 @@ function getRecorderState() {
 }
 
 function setRecorderState(state) {
-    if (state != null) {
+    if (state != null) { 
         switch (state) {
             case recorderState.Record: {
                 recorder.setAttribute('src', "icons/microphone.svg");
@@ -279,3 +282,13 @@ function updateTimerWhilePlaying() {
         timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
     }, 100);
 }
+
+if (!localStorage.getItem("uuid")){
+
+    localStorage.setItem("uuid", uuidv4()); // genera y gaurda el uuid
+
+} // si no está almacenado en localStorage
+
+uuid = localStorage.getItem("uuid"); // logra el uuid desdelocalStorage
+//print pa ver el uuid
+console.log(uuid);
