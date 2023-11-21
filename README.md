@@ -39,6 +39,21 @@ const recorderState = {
     Pause: 'pause button',
 }
 ```
+## Información útil
+Para la gestion del audio vamos a utilizar objetos **blob:**
+### ¿Qué son los objetos Blobl?
++ Sus siglas quieren decir **Binar Large Object**
++ Son una estructura de datos que representa binario, se usa para contener datos binarios como audio o video.
++ Su declaración seria algo tal que así:
+```JS
+const blob = new Blob([data], { options });
+```
+Por ejemplo:
+```JS
+const texto = "Hola, este es un ejemplo de texto.";
+const blobTexto = new Blob([texto], { type: 'text/plain' });
+```
+
 ## Funciones
 ### 1. getRecorderState:
 ```JS
@@ -52,8 +67,8 @@ function getRecorderState() {
         default: return null;
     }
 }
-
 ```
+Sirve para obtener los datos de la grabación en ese momento.
 
 ### 2. setRecorderState:
 ```JS
@@ -99,6 +114,8 @@ function setRecorderState(state) {
     };
 }
 ```
+Se encarga de actualizar la apariencia y el estado del boton de grabación recorder.
+
 ### 3. deleteRecording:
 ```JS
 function deleteRecording(audioEntry) {
@@ -109,6 +126,8 @@ function deleteRecording(audioEntry) {
     setRecorderState(recorderState.Record);
 }
 ```
+Tiene como parametro un audio, este lo elimina y detiene el timer.
+
 ### 4. publishRecording:
 ```JS
 function publishRecording(audioEntry) {
@@ -119,6 +138,7 @@ function publishRecording(audioEntry) {
     setRecorderState(recorderState.Record);
 }
 ```
+Tiene como parámetro un audio, al recibir este metodo la lista crea un li y lo añade. Tras esto reinicia el timer y pone el estado a grabar de nuevo.
 
 ### 5. startRecording:
 ```JS
@@ -152,6 +172,14 @@ async function startRecording() {
     }
 }
 ```
+Función para comenzar a grabar,reseteamos el timer, luego usamos una API para solicitar permiso al microfono del usuario. Crea una instancia de media recorde con el flujo de audio que se esta introduciendo por el microfono. Inicializa un array para almacenar el audio.Luego guarda el momento de inicio.
+
+Fijarse que el timer inicia despues de que se de acceso al microfono.
+
+Creamos un controlador de eventos para el audio, este hace que cada vez quenhay nuevos datos, crea un chunk de audio mas y lo guarda en la lista.
+
+Tenemos también un controlador para ver cuando se para la grabación, crea un objeto Blob a partir de el audio, y se genera un URL para el objeto Blob. Y se establece esa URL como la fuente del elemento de audio (audioPlayer.src). y finalmente para el timer.
+
 ### 6. sleep:
 ```JS
 function sleep(ms) {
@@ -177,7 +205,7 @@ async function stopRecording() {
     }
 }
 ```
-
+Si la app esta grabando, para la grabación y el temporizador, ademas crea un Objeto Blob que guarda en la lista de las grabaciones recientes.
 
 ### 8. startTimer:
 ```JS
@@ -198,9 +226,8 @@ function startTimer() {
         }
     }, 1000);
 }
-
 ```
-
+Inicia el timer y ajusta el formato.
 
 ### 9. stopTimer:
 ```JS
@@ -209,7 +236,7 @@ function stopTimer() {
     clearInterval(timerInterval);
 }
 ```
-
+Detiene el temporizador.
 
 ### 10. addToLastRecordings:
 ```JS
@@ -240,6 +267,7 @@ function addToLastRecordings(audio) {
     }
 }
 ```
+Se encarga de agregar una nueva entrada de audio a la lista de grabaciones recientes (recentList).
 
 ## 11. enableAudioPlay:
 ```JS
@@ -248,6 +276,7 @@ function enableAudioPlay(audioUrl) {
     audioPlayer.src = audioUrl;
 }
 ```
+Permite iniciar una grabación.
 
 ## 12. updateTimerWhilePlaying:
 ```JS
@@ -266,6 +295,7 @@ function updateTimerWhilePlaying() {
     }, 100);
 }
 ```
+Actualiza el contador a medido que grabas.
 
 
 
