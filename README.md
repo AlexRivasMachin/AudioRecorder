@@ -295,7 +295,7 @@ function updateTimerWhilePlaying() {
     }, 100);
 }
 ```
-Actualiza el contador a medido que grabas.
+Actualiza el contador a medida que grabas.
 
 
 
