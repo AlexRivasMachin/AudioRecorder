@@ -8,7 +8,7 @@ const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const likedList = document.getElementById('liked-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
-const buttonSaveRecording = document.getElementById('imageSaveRecording');
+const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
 const statusButtons = document.getElementById('status-buttons');
 
@@ -125,7 +125,7 @@ buttonRecordState.addEventListener('click', () => {
     }
 });
 
-buttonSaveRecording.addEventListener('click', () => {
+buttonCloudActions.addEventListener('click', () => {
     if (existsAudioWithPlayingClass()) {
         publishRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
