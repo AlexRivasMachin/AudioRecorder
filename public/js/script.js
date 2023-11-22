@@ -2,7 +2,7 @@ import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
 
 const audioPlayer = document.getElementById('audio');
-const timer2 = new Timer(document.getElementById('timer'));
+const timer = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
@@ -35,7 +35,7 @@ function getRecorderState() {
 }
 
 function setRecorderState(state) {
-    if (state == null) { 
+    if (state == null) {
         return;
     }
 
@@ -43,7 +43,7 @@ function setRecorderState(state) {
 
     switch (state) {
 
-        case recorderState.Record: 
+        case recorderState.Record:
             changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
             break;
         case recorderState.Stop:
@@ -57,22 +57,21 @@ function setRecorderState(state) {
             break;
     }
 }
-
 function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, color, imgIcon, imgClass){
     changeRecorderButtonAppareance(state, recorderIcon, color);
     changeRecordingImgAppareance(imgIcon, imgClass);
 }
 
-function changeRecorderButtonAppareance(state, icon, color){
+function changeRecorderButtonAppareance(state, icon, color) {
     recorder.setAttribute('src', `icons/${icon}.svg`);
     recorder.setAttribute('alt', state);
     recorder.removeAttribute('class');
     recorder.classList.add('animated-button', `${color}-animated-button`, 'rounded-button');
 }
 
-function changeRecordingImgAppareance(icon, imgClass){
+function changeRecordingImgAppareance(icon, imgClass) {
     recordingImg.setAttribute('src', `icons/${icon}.svg`);
-    if(imgClass == "parpadea"){
+    if (imgClass == "parpadea") {
         recordingImg.setAttribute('class', "parpadea");
     }
 }
@@ -84,14 +83,12 @@ recorder.addEventListener('click', async () => {
         switch (state) {
             case recorderState.Record: {
                 setRecorderState(recorderState.Stop);
-                showDisabledRecord();
                 timer2.startTimer();
                 await startRecording();
                 return;
             };
             case recorderState.Stop: {
                 setRecorderState(recorderState.Record);
-                showEnableRecord();
                 timer2.stopTimer();
                 timer2.reloadTimer();
                 await stopRecording();
@@ -99,14 +96,12 @@ recorder.addEventListener('click', async () => {
             };
             case recorderState.Play: {
                 setRecorderState(recorderState.Pause);
-                showEnableRecord();
                 timer2.continueTimer(audioPlayer);
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
                 setRecorderState(recorderState.Play);
-                showEnableRecord();
                 timer2.stopTimer();
                 audioPlayer.pause();
                 return;
@@ -117,57 +112,57 @@ recorder.addEventListener('click', async () => {
 
 buttonRecordState.addEventListener('click', () => {
     if(isRecording()){
-
+    
     }
     else{
-        setRecorderState(recorderState.Record);
-        if(existsAudioWithPlayingClass()){
-            removeAudioWithPlayingClass();
-        }
+    setRecorderState(recorderState.Record);
+    if(existsAudioWithPlayingClass()){
+        removeAudioWithPlayingClass();
     }
+}
 });
 
 buttonSaveRecording.addEventListener('click', () => {
-    if(existsAudioWithPlayingClass()){
+    if (existsAudioWithPlayingClass()) {
         publishRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
     }
 });
 
 buttonDeleteRecording.addEventListener('click', () => {
-    if(existsAudioWithPlayingClass()){
+    if (existsAudioWithPlayingClass()) {
         deleteRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
     }
 });
 
-function existsAudioWithPlayingClass(){
+function existsAudioWithPlayingClass() {
     return getAudiosWithPlayingClass().length > 0;
 }
 
-function removeAudioWithPlayingClass(){
+function removeAudioWithPlayingClass() {
     getAudiosWithPlayingClass().forEach(audio => {
         audio.classList.remove('playing');
     })
 }
 
-function getAudiosWithPlayingClass(){
+function getAudiosWithPlayingClass() {
     return document.querySelectorAll('.playing');
 }
 
 function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
-    timer2.stopTimer(); 
-    timer2.reloadTimer();
+    timer.stopTimer();
+    timer.reloadTimer();
     setRecorderState(recorderState.Record);
 }
 
 function publishRecording(audioEntry) {
     audioEntry.parentNode.removeChild(audioEntry);
     likedList.appendChild(audioEntry);
-    timer2.stopTimer();
-    timer2.reloadTimer();
+    timer.stopTimer();
+    timer.reloadTimer();
     setRecorderState(recorderState.Record);
 }
 
@@ -210,11 +205,11 @@ async function stopRecording() {
     }
 }
 
-function isRecording(){
+function isRecording() {
     return mediaRecorder && mediaRecorder.state === 'recording';
 }
 
-function stopTimerRecord(){
+function stopTimerRecord() {
     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
     audioBlob.name = new Date().toUTCString().slice(4, 22);
     addToLastRecordings(audioBlob);
@@ -258,8 +253,8 @@ recentList.addEventListener('click', (e) => {
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
 
-        timer2.stopTimer();
-        timer2.reloadTimer();
+        timer.stopTimer();
+        timer.reloadTimer();
 
         if (mediaRecorder && mediaRecorder.state === 'recording') {
         }
@@ -289,7 +284,7 @@ function enableAudioPlay(audioUrl) {
     audioPlayer.src = audioUrl;
 }
 
-if (!localStorage.getItem("uuid")){
+if (!localStorage.getItem("uuid")) {
 
     localStorage.setItem("uuid", uuidv4()); // genera y gaurda el uuid
 
