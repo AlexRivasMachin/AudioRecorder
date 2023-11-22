@@ -2,7 +2,8 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   --dot-bg: #e2e2e2;
   --dot-color: rgb(253, 105, 105);
@@ -37,26 +38,9 @@ hr {
 .audio-area {
   display: flex;
   height: 100vh;
-  justify-content: space-between;
   background-color: transparent;
 }
 
-#logo {
-  width: 120px;
-  height: 120px;
-  margin: 10px 10px 10 10;
-  background-color: black;
-  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-  color: white;
-  text-align: left;
-  font-size: 30px;
-}
-
-.audio-area p {
-  font-size: larger;
-  padding: 0px;
-}
 
 .audio-toolbar {
   margin-top: 15px;
@@ -71,6 +55,7 @@ hr {
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
+  max-width: 300px;
 }
 
 .recent {
@@ -107,16 +92,17 @@ hr {
   display: flex;
 }
 
-.audio-recorder-section {
+.audioElements{
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: inherit;
-  gap: 3em;
+  width: 100%;
+  padding: 20px;
 }
 
 .audio-recorder {
+  margin: 20px;
+  padding: 20px;
   width: 350px;
   text-align: center;
   background-color: inherit;
@@ -124,6 +110,11 @@ hr {
 
 .status-buttons {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2em;
+  flex-direction: column;
+  transition: all 0.8s ease;
 }
 
 .state-button {
@@ -179,7 +170,7 @@ hr {
 }
 
 .red-animated-button:hover {
-  box-shadow: rgb(201, 46, 70) 0px 7px 0px 0px;
+  background-color: rgb(255, 56, 86);
 }
 
 .red-animated-button:active {
@@ -196,7 +187,7 @@ hr {
   justify-content: center;
   align-items: center;
   margin-bottom: 5px;
-  padding: 5px;
+  padding: 1px;
   border: 1px;
   border-radius: 5px;
   border-style: solid;
@@ -220,6 +211,12 @@ hr {
   border-color: var(--dot-bg);
 }
 
+.audio-entry img{
+  margin-right: 10px;
+  margin-left: 10px;
+  max-width: 20px;
+}
+
 button {
   font-family: monospace;
   border-radius: 3px;
@@ -228,8 +225,19 @@ button {
   border: none;
   padding: 5px 10px;
   cursor: pointer;
-  margin-top: 20px; /* Espacio entre el botón y el reproductor */
+  margin-top: 20px;
 }
+
+.enabled-background{
+  background-color: rgb(255, 56, 86);
+  box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;
+}
+
+.gray-background {
+    background-color: gray !important;
+    box-shadow: rgb(92, 87, 87) 0px 10px 0px 0px;
+}
+
 
 #recorded-time {
   display: flex;
@@ -288,7 +296,38 @@ input[type="checkbox"] {
 
 .parpadea {
   animation-name: parpadeo;
-  animation-duration: 1.5s;
-  animation-timing-function: cubic-bezier(0.25, 0.8, 0.1, 0.95);
-  animation-iteration-count: infinite;
+}
+@media screen  and (max-width: 1000px){
+  .audio-area {
+    flex-direction: column;
+    align-items: center;
+    padding: 0px;
+    margin: 0px;
+  }
+  .audio-toolbar {
+    margin-left: 0px;
+    margin-bottom: 0px;
+    width: 80%;
+    max-width: 100%;
+    min-height: 500px;
+  }
+  .audioElements{
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .status-buttons{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  transition: all 0.8s ease;
+  max-width: 70px;
+  padding: 10px;
+  }
+
+  .status-buttons img{
+    margin-right: 5px;
+    margin-left: 5px;
+  }
 }

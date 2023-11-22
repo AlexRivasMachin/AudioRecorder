@@ -57,6 +57,7 @@ function setRecorderState(state) {
             break;
     }
 }
+
 function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, color, imgIcon, imgClass){
     changeRecorderButtonAppareance(state, recorderIcon, color);
     changeRecordingImgAppareance(imgIcon, imgClass);
@@ -77,17 +78,20 @@ function changeRecordingImgAppareance(icon, imgClass){
 }
 
 recorder.addEventListener('click', async () => {
+    
     let state = getRecorderState();
     if (state != null) {
         switch (state) {
             case recorderState.Record: {
                 setRecorderState(recorderState.Stop);
+                showDisabledRecord();
                 timer2.startTimer();
                 await startRecording();
                 return;
             };
             case recorderState.Stop: {
                 setRecorderState(recorderState.Record);
+                showEnableRecord();
                 timer2.stopTimer();
                 timer2.reloadTimer();
                 await stopRecording();
@@ -95,12 +99,14 @@ recorder.addEventListener('click', async () => {
             };
             case recorderState.Play: {
                 setRecorderState(recorderState.Pause);
+                showEnableRecord();
                 timer2.continueTimer(audioPlayer);
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
                 setRecorderState(recorderState.Play);
+                showEnableRecord();
                 timer2.stopTimer();
                 audioPlayer.pause();
                 return;
@@ -109,11 +115,15 @@ recorder.addEventListener('click', async () => {
     };
 });
 
-
 buttonRecordState.addEventListener('click', () => {
-    setRecorderState(recorderState.Record);
-    if(existsAudioWithPlayingClass()){
-        removeAudioWithPlayingClass();
+    if(isRecording()){
+
+    }
+    else{
+        setRecorderState(recorderState.Record);
+        if(existsAudioWithPlayingClass()){
+            removeAudioWithPlayingClass();
+        }
     }
 });
 

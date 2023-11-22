@@ -1,64 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/styles.css" />
     <title>Notas de voz</title>
   </head>
+
   <body>
+
     <section class="audio-area">
       <div class="audio-toolbar">
         <p><strong>Tus audios</strong></p>
+
         <div class="recent">
           <hr />
           <p>Audios recientes</p>
           <div id="recent-list"></div>
         </div>
+
         <ul id="Recent Records"></ul>
+
         <div class="liked">
           <hr />
           <p>Audios destacados</p>
           <div id="liked-list"></div>
         </div>
+    
       </div>
-      <section class="audio-recorder-section">
-        <div id="audio-recorder">
-          <img
-            id="recorder-status"
-            class="animated-button red-animated-button rounded-button"
-            src="icons/microphone.svg"
-            alt="record button"
-          />
-          <div id="recorded-time">
-            <img id="recording-img" src="icons/recording.svg" width="25px" />
-            <h2 id="timer">00:00:00</h2>
+
+      <div class="audioElements">
+
+        <div class="audio-recorder">
+            <img
+              id="recorder-status"
+              class="animated-button red-animated-button rounded-button"
+              src="icons/microphone.svg"
+              alt="record button"
+            />
+            <div id="recorded-time">
+              <img id="recording-img" src="icons/recording.svg" width="25px" />
+              <h2 id="timer">00:00:00</h2>
+            </div>
+            <audio id="audio"></audio>
           </div>
-          <audio id="audio"></audio>
-        </div>
-        <div id="status-buttons">
-          <img
-            id="imageBackToRecording"
-            src="icons/microphone.svg"
-            class="state-button red-animated-button rounded-button"
-          />
-          <img
-            id="imageSaveRedocrding"
-            src="icons/cloud-upload.svg"
-            class="state-button button-with-background red-animated-button rounded-button"
-          />
-          <img
-            id="imageDeleteRecording"
-            src="icons/delete.svg"
-            class="state-button button-with-background red-animated-button rounded-button"
-          />
-        </div>
-      </section>
-      <div id="logo">
-        MY <br />
-        AUDIO
+
+          <div class="status-buttons">
+            <img
+              id="imageBackToRecording"
+              src="icons/microphone.svg"
+              class="state-button red-animated-button rounded-button"
+            />
+            <img
+              id="imageSaveRedocrding"
+              src="icons/cloud-upload.svg"
+              class="state-button button-with-background red-animated-button rounded-button"
+            />
+            <img
+              id="imageDeleteRecording"
+              src="icons/delete.svg"
+              class="state-button button-with-background red-animated-button rounded-button"
+            />
+          </div>
       </div>
+
     </section>
+
     <script src="js/script.js" type="module"></script>
+
   </body>
 </html>
