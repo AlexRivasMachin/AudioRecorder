@@ -41,7 +41,6 @@ hr {
   background-color: transparent;
 }
 
-
 .audio-toolbar {
   margin-top: 15px;
   margin-bottom: 15px;
@@ -92,7 +91,7 @@ hr {
   display: flex;
 }
 
-.audioElements{
+.audioElements {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,7 +107,7 @@ hr {
   background-color: inherit;
 }
 
-.status-buttons {
+#status-buttons {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -181,6 +180,13 @@ hr {
   transition: 200ms;
 }
 
+.disabled {
+  opacity: 0;
+  cursor: not-allowed;
+  pointer-events: none;
+  transition: all 0.5s;
+}
+
 .audio-entry {
   height: 20px;
   display: flex;
@@ -211,7 +217,7 @@ hr {
   border-color: var(--dot-bg);
 }
 
-.audio-entry img{
+.audio-entry img {
   margin-right: 10px;
   margin-left: 10px;
   max-width: 20px;
@@ -228,16 +234,15 @@ button {
   margin-top: 20px;
 }
 
-.enabled-background{
+.enabled-background {
   background-color: rgb(255, 56, 86);
   box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;
 }
 
 .gray-background {
-    background-color: gray !important;
-    box-shadow: rgb(92, 87, 87) 0px 10px 0px 0px;
+  background-color: gray !important;
+  box-shadow: rgb(92, 87, 87) 0px 10px 0px 0px;
 }
-
 
 #recorded-time {
   display: flex;
@@ -297,7 +302,7 @@ input[type="checkbox"] {
 .parpadea {
   animation-name: parpadeo;
 }
-@media screen  and (max-width: 1000px){
+@media screen and (max-width: 1000px) {
   .audio-area {
     flex-direction: column;
     align-items: center;
@@ -311,22 +316,22 @@ input[type="checkbox"] {
     max-width: 100%;
     min-height: 500px;
   }
-  .audioElements{
+  .audioElements {
     flex-direction: column;
     align-items: center;
     width: 100%;
   }
-  .status-buttons{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  transition: all 0.8s ease;
-  max-width: 70px;
-  padding: 10px;
+  #status-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    transition: all 0.8s ease;
+    max-width: 70px;
+    padding: 10px;
   }
 
-  .status-buttons img{
+  #status-buttons img {
     margin-right: 5px;
     margin-left: 5px;
   }
