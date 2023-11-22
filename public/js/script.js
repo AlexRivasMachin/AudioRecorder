@@ -57,7 +57,7 @@ function setRecorderState(state) {
             break;
     }
 }
-function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, color, imgIcon, imgClass){
+function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, color, imgIcon, imgClass) {
     changeRecorderButtonAppareance(state, recorderIcon, color);
     changeRecordingImgAppareance(imgIcon, imgClass);
 }
@@ -83,26 +83,26 @@ recorder.addEventListener('click', async () => {
         switch (state) {
             case recorderState.Record: {
                 setRecorderState(recorderState.Stop);
-                timer2.startTimer();
+                timer.startTimer();
                 await startRecording();
                 return;
             };
             case recorderState.Stop: {
                 setRecorderState(recorderState.Record);
-                timer2.stopTimer();
-                timer2.reloadTimer();
+                timer.stopTimer();
+                timer.reloadTimer();
                 await stopRecording();
                 return;
             };
             case recorderState.Play: {
                 setRecorderState(recorderState.Pause);
-                timer2.continueTimer(audioPlayer);
+                timer.continueTimer(audioPlayer);
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
                 setRecorderState(recorderState.Play);
-                timer2.stopTimer();
+                timer.stopTimer();
                 audioPlayer.pause();
                 return;
             };
@@ -116,7 +116,7 @@ buttonRecordState.addEventListener('click', () => {
     }
     else{
     setRecorderState(recorderState.Record);
-    if(existsAudioWithPlayingClass()){
+    if (existsAudioWithPlayingClass()) {
         removeAudioWithPlayingClass();
     }
 }
