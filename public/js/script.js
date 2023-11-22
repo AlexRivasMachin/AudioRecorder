@@ -226,11 +226,11 @@ function isRecording() {
 function stopTimerRecord() {
     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
     audioBlob.name = new Date().toUTCString().slice(4, 22);
-    addToLastRecordings(audioBlob);
+    addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.name);
 }
 
 
-function addToLastRecordings(audio) {
+function addToLastRecordings(audioUrl, audioName) {
     try {
         const audioEntry = document.createElement('div');
         audioEntry.setAttribute('class', 'audio-entry');
@@ -238,12 +238,12 @@ function addToLastRecordings(audio) {
         const play = document.createElement('img');
         play.setAttribute('src', 'icons/play-audio-list.svg');
         play.setAttribute('class', 'play-button');
-        play.setAttribute('data-audio', URL.createObjectURL(audio));
+        play.setAttribute('data-audio', new URL(audioUrl));
         audioEntry.appendChild(play);
 
         const name = document.createElement('p');
         name.setAttribute('class', 'audio-name');
-        name.innerHTML = audio.name;
+        name.innerHTML = audioName;
         audioEntry.appendChild(name);
 
         const publish = document.createElement('img');
@@ -263,24 +263,24 @@ function addToLastRecordings(audio) {
     }
 }
 
+function playTargetedAudio(audioEntry, audioUrl) {
+    timer.stopTimer();
+    timer.reloadTimer();
+
+    // Remove the 'playing' class from all audio entries
+    document.querySelectorAll('.audio-entry').forEach(entry => {
+        entry.classList.remove('playing');
+    });
+    audioEntry.classList.add('playing');
+    recordingImg.removeAttribute('class');
+    enableAudioPlay(audioUrl);
+}
+
 recentList.addEventListener('click', (e) => {
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
-
-        timer.stopTimer();
-        timer.reloadTimer();
-
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-        }
-
-        // Remove the 'playing' class from all audio entries
-        document.querySelectorAll('.audio-entry').forEach(entry => {
-            entry.classList.remove('playing');
-        });
-        audioEntry.classList.add('playing');
         const audioUrl = e.target.dataset.audio;
-        recordingImg.removeAttribute('class');
-        enableAudioPlay(audioUrl);
+        playTargetedAudio(audioEntry, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
         const audioEntry = e.target.closest('.audio-entry');
@@ -292,8 +292,18 @@ recentList.addEventListener('click', (e) => {
     }
 });
 
-likedList.addEventListener('click', () => {
-
+likedList.addEventListener('click', (e) => {
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-name')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        const audioUrl = e.target.dataset.audio;
+        playTargetedAudio(audioEntry, audioUrl);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        const audioName = audioEntry.querySelector('.audio-name').innerHTML;
+        const audioUrl = audioEntry.querySelector('.play-button').dataset.audio;
+        addToLastRecordings(audioUrl, audioName)
+    }
 });
 
 function enableAudioPlay(audioUrl) {
