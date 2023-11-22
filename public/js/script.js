@@ -4,7 +4,6 @@ import Timer from './timer.js';
 const audioPlayer = document.getElementById('audio');
 const timer2 = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
-const recordedTime = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const likedList = document.getElementById('liked-list');
@@ -181,55 +180,66 @@ async function startRecording() {
         };
 
         mediaRecorder.start();
-
     } catch (error) {
         console.error('Error al acceder al micrófono:', error);
     }
 }
+
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
+    if (isRecording()) {
         await mediaRecorder.stop();
-        // Si no espero un poco no actualiza la lista, no se porq falla el await anterior
         await sleep(30);
-        // Detenemo el temporizador
         if (audioChunks.length > 0) {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioBlob.name = new Date().toUTCString().slice(4, 22);
-            addToLastRecordings(audioBlob);
+            stopTimerRecord();
         }
     }
 }
 
+function isRecording(){
+    return mediaRecorder && mediaRecorder.state === 'recording';
+}
+
+function stopTimerRecord(){
+    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+    audioBlob.name = new Date().toUTCString().slice(4, 22);
+    addToLastRecordings(audioBlob);
+}
 
 
 function addToLastRecordings(audio) {
     try {
         const audioEntry = document.createElement('div');
         audioEntry.setAttribute('class', 'audio-entry');
+
         const play = document.createElement('img');
         play.setAttribute('src', 'icons/play-audio-list.svg');
         play.setAttribute('class', 'play-button');
         play.setAttribute('data-audio', URL.createObjectURL(audio));
         audioEntry.appendChild(play);
+
         const name = document.createElement('p');
         name.setAttribute('class', 'audio-name');
         name.innerHTML = audio.name;
         audioEntry.appendChild(name);
+
         const publish = document.createElement('img');
         publish.setAttribute('src', 'icons/cloud-upload.svg');
         publish.setAttribute('class', 'publish-button');
         audioEntry.appendChild(publish);
+
         const remove = document.createElement('img');
         remove.setAttribute('src', 'icons/delete.svg');
         remove.setAttribute('class', 'remove-button');
         audioEntry.appendChild(remove);
         recentList.append(audioEntry);
-    } catch (error) {
+
+    }
+    catch (error) {
         console.error('Error updating last recordings:', error);
     }
 }
