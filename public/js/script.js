@@ -163,6 +163,17 @@ function deleteRecording(audioEntry) {
 
 function publishRecording(audioEntry) {
     audioEntry.parentNode.removeChild(audioEntry);
+    Array.from(audioEntry.children).forEach(c => {
+        if (c.classList.contains('publish-button') || c.classList.contains('remove-button')) {
+            c.parentNode.removeChild(c);
+        }
+    });
+
+    const download = document.createElement('img');
+    download.setAttribute('src', 'icons/cloud-download.svg');
+    download.setAttribute('class', 'download-button');
+    audioEntry.appendChild(download);
+
     likedList.appendChild(audioEntry);
     timer.stopTimer();
     timer.reloadTimer();
@@ -281,6 +292,9 @@ recentList.addEventListener('click', (e) => {
     }
 });
 
+likedList.addEventListener('click', () => {
+
+});
 
 function enableAudioPlay(audioUrl) {
     setRecorderState(recorderState.Play);
