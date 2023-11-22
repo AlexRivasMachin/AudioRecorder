@@ -125,10 +125,45 @@ buttonRecordState.addEventListener('click', () => {
     }
 });
 
+const cloudActionState = {
+    Upload: 'upload button',
+    Download: 'download button',
+}
+
+function getCloudActionsBtnState() {
+    let alt = buttonCloudActions.getAttribute('alt');
+    switch (alt) {
+        case 'upload button': return cloudActionState.Upload;
+        case 'download button': return cloudActionState.Download;
+        default: return null;
+    }
+}
+
+function setCloudActionsBtnState(state) {
+    if (state == null) {
+        return;
+    }
+
+    switch (state) {
+        case cloudActionState.Upload:
+            buttonCloudActions.setAttribute('src', 'icons/cloud-upload.svg')
+            buttonCloudActions.setAttribute('alt', cloudActionState.Upload);
+            break;
+        case cloudActionState.Download:
+            buttonCloudActions.setAttribute('src', 'icons/cloud-download.svg')
+            buttonCloudActions.setAttribute('alt', cloudActionState.Download);
+            break;
+    }
+}
+
 buttonCloudActions.addEventListener('click', () => {
-    if (existsAudioWithPlayingClass()) {
+    const state = getCloudActionsBtnState();
+    if (existsAudioWithPlayingClass() && state == cloudActionState.Upload) {
         publishRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
+    } else {
+        donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
+        setRecorderState(recorderState.Record);
     }
 });
 
@@ -280,6 +315,7 @@ recentList.addEventListener('click', (e) => {
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
         const audioUrl = e.target.dataset.audio;
+        setCloudActionsBtnState(cloudActionState.Upload);
         playTargetedAudio(audioEntry, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
@@ -296,6 +332,7 @@ likedList.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
         const audioUrl = e.target.dataset.audio;
+        setCloudActionsBtnState(cloudActionState.Download);
         playTargetedAudio(audioEntry, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
@@ -304,11 +341,15 @@ likedList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
         const audioEntry = e.target.closest('.audio-entry');
-        const audioName = audioEntry.querySelector('.audio-name').innerHTML;
-        const audioUrl = audioEntry.querySelector('.play-button').dataset.audio;
-        addToLastRecordings(audioUrl, audioName)
+        donwloadAudioFromNode(audioEntry);
     }
 });
+
+function donwloadAudioFromNode(audioEntryNode) {
+    const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
+    const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
+    addToLastRecordings(audioUrl, audioName)
+}
 
 function enableAudioPlay(audioUrl) {
     setRecorderState(recorderState.Play);
