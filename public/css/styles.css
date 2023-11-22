@@ -301,6 +301,9 @@ input[type="checkbox"] {
 
 .parpadea {
   animation-name: parpadeo;
+  animation-duration: 1.5s;
+  animation-timing-function: cubic-bezier(0.25, 0.8, 0.1, 0.95);
+  animation-iteration-count: infinite;
 }
 @media screen and (max-width: 1000px) {
   .audio-area {
