@@ -10,6 +10,7 @@ const likedList = document.getElementById('liked-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
 const buttonSaveRecording = document.getElementById('imageSaveRedocrding');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
+const statusButtons = document.getElementById('status-buttons');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -45,12 +46,14 @@ function setRecorderState(state) {
 
         case recorderState.Record:
             changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
+            disablePlayControls();
             break;
         case recorderState.Stop:
             changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
             break;
         case recorderState.Play:
             changeRecorderButtonAndRecordingImgAppearence(state, 'play', 'green', 'playing', 'normal');
+            enablePlayControls();
             break;
         case recorderState.Pause:
             changeRecorderButtonAndRecordingImgAppearence(state, 'pause', 'green', 'playing', 'parpadea');
@@ -77,7 +80,7 @@ function changeRecordingImgAppareance(icon, imgClass) {
 }
 
 recorder.addEventListener('click', async () => {
-    
+
     let state = getRecorderState();
     if (state != null) {
         switch (state) {
@@ -111,15 +114,15 @@ recorder.addEventListener('click', async () => {
 });
 
 buttonRecordState.addEventListener('click', () => {
-    if(isRecording()){
-    
+    if (isRecording()) {
+
     }
-    else{
-    setRecorderState(recorderState.Record);
-    if (existsAudioWithPlayingClass()) {
-        removeAudioWithPlayingClass();
+    else {
+        setRecorderState(recorderState.Record);
+        if (existsAudioWithPlayingClass()) {
+            removeAudioWithPlayingClass();
+        }
     }
-}
 });
 
 buttonSaveRecording.addEventListener('click', () => {
@@ -282,6 +285,18 @@ recentList.addEventListener('click', (e) => {
 function enableAudioPlay(audioUrl) {
     setRecorderState(recorderState.Play);
     audioPlayer.src = audioUrl;
+}
+
+function enablePlayControls() {
+    Array.from(statusButtons.children).forEach(c => {
+        c.classList.remove('disabled');
+    });
+}
+
+function disablePlayControls() {
+    Array.from(statusButtons.children).forEach(c => {
+        c.classList.add('disabled');
+    });
 }
 
 if (!localStorage.getItem("uuid")) {
