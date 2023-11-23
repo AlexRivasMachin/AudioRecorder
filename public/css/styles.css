@@ -35,11 +35,11 @@ hr {
   margin: 10px 0;
 }
 
-h1{
+h1 {
   margin: 5px;
 }
 
-h3{
+h3 {
   margin: 5px;
 }
 
@@ -70,7 +70,7 @@ h3{
   flex: 0 0 48%;
   margin: 10px;
   padding: 5px;
-  color: #fff;;
+  color: #fff;
   background-color: #2b2a2a;
   border-radius: 10px;
   max-height: 40%;
@@ -221,15 +221,17 @@ h3{
   border-radius: 4px;
   border-style: solid;
   border-color: transparent;
-  img {
-    height: 100%;
-    margin-right: 5%;
-  }
-  p {
-    display: inline-block;
-    width: 80%;
-    height: 1em;
-  }
+}
+
+.audio-entry img {
+  height: 100%;
+  margin-right: 5%;
+}
+
+.audio-entry p {
+  display: inline-block;
+  width: 80%;
+  height: 1em;
 }
 
 .audio-entry:hover {
@@ -273,9 +275,10 @@ button {
   text-align: center;
   justify-content: center;
   align-items: center;
-  h2 {
-    margin-left: 20px;
-  }
+}
+
+#recorded-time h2 {
+  margin-left: 20px;
 }
 
 button:hover {
@@ -342,10 +345,10 @@ input[type="checkbox"] {
     max-width: 100%;
     min-height: 600px;
   }
-  .liked{
+  .liked {
     max-height: 42%;
   }
-  .recent{
+  .recent {
     max-height: 40%;
   }
 
@@ -355,10 +358,10 @@ input[type="checkbox"] {
     width: 72%;
   }
 
-  .audio-recorder{
+  .audio-recorder {
     width: 80%;
   }
-  .audio-recorder img{
+  .audio-recorder img {
     max-width: 200px;
   }
   #status-buttons {
