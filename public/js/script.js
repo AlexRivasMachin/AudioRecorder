@@ -311,10 +311,14 @@ function playTargetedAudio(audioEntry, audioUrl) {
     enableAudioPlay(audioUrl);
 }
 
+function getAudioEntryAudioURL(audioEntry) {
+    return audioEntry.querySelector('[data-audio]').dataset.audio;
+}
+
 recentList.addEventListener('click', (e) => {
-    if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
+    if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name') || e.target.classList.contains('audio-entry')) {
         const audioEntry = e.target.closest('.audio-entry');
-        const audioUrl = e.target.dataset.audio;
+        const audioUrl = getAudioEntryAudioURL(audioEntry);
         setCloudActionsBtnState(cloudActionState.Upload);
         playTargetedAudio(audioEntry, audioUrl);
     }
