@@ -8,8 +8,9 @@ const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const likedList = document.getElementById('liked-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
-const buttonSaveRecording = document.getElementById('imageSaveRedocrding');
+const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
+const statusButtons = document.getElementById('status-buttons');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -45,12 +46,14 @@ function setRecorderState(state) {
 
         case recorderState.Record:
             changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
+            disablePlayControls();
             break;
         case recorderState.Stop:
             changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
             break;
         case recorderState.Play:
             changeRecorderButtonAndRecordingImgAppearence(state, 'play', 'green', 'playing', 'normal');
+            enablePlayControls();
             break;
         case recorderState.Pause:
             changeRecorderButtonAndRecordingImgAppearence(state, 'pause', 'green', 'playing', 'parpadea');
@@ -77,7 +80,7 @@ function changeRecordingImgAppareance(icon, imgClass) {
 }
 
 recorder.addEventListener('click', async () => {
-    
+
     let state = getRecorderState();
     if (state != null) {
         switch (state) {
@@ -111,21 +114,56 @@ recorder.addEventListener('click', async () => {
 });
 
 buttonRecordState.addEventListener('click', () => {
-    if(isRecording()){
-    
+    if (isRecording()) {
+
     }
-    else{
-    setRecorderState(recorderState.Record);
-    if (existsAudioWithPlayingClass()) {
-        removeAudioWithPlayingClass();
+    else {
+        setRecorderState(recorderState.Record);
+        if (existsAudioWithPlayingClass()) {
+            removeAudioWithPlayingClass();
+        }
     }
-}
 });
 
-buttonSaveRecording.addEventListener('click', () => {
-    if (existsAudioWithPlayingClass()) {
+const cloudActionState = {
+    Upload: 'upload button',
+    Download: 'download button',
+}
+
+function getCloudActionsBtnState() {
+    let alt = buttonCloudActions.getAttribute('alt');
+    switch (alt) {
+        case 'upload button': return cloudActionState.Upload;
+        case 'download button': return cloudActionState.Download;
+        default: return null;
+    }
+}
+
+function setCloudActionsBtnState(state) {
+    if (state == null) {
+        return;
+    }
+
+    switch (state) {
+        case cloudActionState.Upload:
+            buttonCloudActions.setAttribute('src', 'icons/cloud-upload.svg')
+            buttonCloudActions.setAttribute('alt', cloudActionState.Upload);
+            break;
+        case cloudActionState.Download:
+            buttonCloudActions.setAttribute('src', 'icons/cloud-download.svg')
+            buttonCloudActions.setAttribute('alt', cloudActionState.Download);
+            break;
+    }
+}
+
+buttonCloudActions.addEventListener('click', () => {
+    const state = getCloudActionsBtnState();
+    if (existsAudioWithPlayingClass() && state == cloudActionState.Upload) {
         publishRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
+    } else {
+        donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
+        setRecorderState(recorderState.Record);
     }
 });
 
@@ -160,6 +198,17 @@ function deleteRecording(audioEntry) {
 
 function publishRecording(audioEntry) {
     audioEntry.parentNode.removeChild(audioEntry);
+    Array.from(audioEntry.children).forEach(c => {
+        if (c.classList.contains('publish-button')) {
+            c.parentNode.removeChild(c);
+        }
+    });
+
+    const download = document.createElement('img');
+    download.setAttribute('src', 'icons/cloud-download.svg');
+    download.setAttribute('class', 'download-button');
+    audioEntry.appendChild(download);
+
     likedList.appendChild(audioEntry);
     timer.stopTimer();
     timer.reloadTimer();
@@ -212,11 +261,11 @@ function isRecording() {
 function stopTimerRecord() {
     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
     audioBlob.name = new Date().toUTCString().slice(4, 22);
-    addToLastRecordings(audioBlob);
+    addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.name);
 }
 
 
-function addToLastRecordings(audio) {
+function addToLastRecordings(audioUrl, audioName) {
     try {
         const audioEntry = document.createElement('div');
         audioEntry.setAttribute('class', 'audio-entry');
@@ -224,12 +273,12 @@ function addToLastRecordings(audio) {
         const play = document.createElement('img');
         play.setAttribute('src', 'icons/play-audio-list.svg');
         play.setAttribute('class', 'play-button');
-        play.setAttribute('data-audio', URL.createObjectURL(audio));
+        play.setAttribute('data-audio', new URL(audioUrl));
         audioEntry.appendChild(play);
 
         const name = document.createElement('p');
         name.setAttribute('class', 'audio-name');
-        name.innerHTML = audio.name;
+        name.innerHTML = audioName;
         audioEntry.appendChild(name);
 
         const publish = document.createElement('img');
@@ -249,24 +298,25 @@ function addToLastRecordings(audio) {
     }
 }
 
+function playTargetedAudio(audioEntry, audioUrl) {
+    timer.stopTimer();
+    timer.reloadTimer();
+
+    // Remove the 'playing' class from all audio entries
+    document.querySelectorAll('.audio-entry').forEach(entry => {
+        entry.classList.remove('playing');
+    });
+    audioEntry.classList.add('playing');
+    recordingImg.removeAttribute('class');
+    enableAudioPlay(audioUrl);
+}
+
 recentList.addEventListener('click', (e) => {
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name')) {
         const audioEntry = e.target.closest('.audio-entry');
-
-        timer.stopTimer();
-        timer.reloadTimer();
-
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-        }
-
-        // Remove the 'playing' class from all audio entries
-        document.querySelectorAll('.audio-entry').forEach(entry => {
-            entry.classList.remove('playing');
-        });
-        audioEntry.classList.add('playing');
         const audioUrl = e.target.dataset.audio;
-        recordingImg.removeAttribute('class');
-        enableAudioPlay(audioUrl);
+        setCloudActionsBtnState(cloudActionState.Upload);
+        playTargetedAudio(audioEntry, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
         const audioEntry = e.target.closest('.audio-entry');
@@ -278,10 +328,44 @@ recentList.addEventListener('click', (e) => {
     }
 });
 
+likedList.addEventListener('click', (e) => {
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-name')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        const audioUrl = e.target.dataset.audio;
+        setCloudActionsBtnState(cloudActionState.Download);
+        playTargetedAudio(audioEntry, audioUrl);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        deleteRecording(audioEntry);
+    }
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
+        const audioEntry = e.target.closest('.audio-entry');
+        donwloadAudioFromNode(audioEntry);
+    }
+});
+
+function donwloadAudioFromNode(audioEntryNode) {
+    const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
+    const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
+    addToLastRecordings(audioUrl, audioName)
+}
 
 function enableAudioPlay(audioUrl) {
     setRecorderState(recorderState.Play);
     audioPlayer.src = audioUrl;
+}
+
+function enablePlayControls() {
+    Array.from(statusButtons.children).forEach(c => {
+        c.classList.remove('disabled');
+    });
+}
+
+function disablePlayControls() {
+    Array.from(statusButtons.children).forEach(c => {
+        c.classList.add('disabled');
+    });
 }
 
 if (!localStorage.getItem("uuid")) {
