@@ -86,8 +86,8 @@ recorder.addEventListener('click', async () => {
         switch (state) {
             case recorderState.Record: {
                 setRecorderState(recorderState.Stop);
-                timer.startTimer();
                 await startRecording();
+                timer.startTimer();
                 return;
             };
             case recorderState.Stop: {
