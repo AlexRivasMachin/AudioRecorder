@@ -33,3 +33,4 @@ function changeRecorderButtonAppareance(state, icon, color) {
     boton.classList.add('animated-button', `${color}-animated-button`, 'rounded-button');
 }
 
+

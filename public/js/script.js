@@ -2,6 +2,9 @@ import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
 
 import { addFunctionalityRecordButton, changeRecorderButtonAppareance } from "./buttonRecord.js";
+import { addFunctionalityChangeToRecordButton, removeClassAtributeFromChangeToRecordButton, enableChangeToRecordButton, disableChangeToRecordButton } from './buttonChangeToRecord.js';
+import { addFunctionalityCloudButton, setCloudButtonState, enableCloudButton, disableCloudButton } from './buttonCloud.js';
+import { addFunctionalityDeleteRecordingButton, enableDeleteRecordingButton, disableDeleteRecordingButton } from './buttonDeleteRecording.js';
 
 class App{
 
@@ -10,6 +13,9 @@ class App{
     state;
     mediaRecorder;
     timer;
+    recordingImg;
+    recentList;
+    linkedList;
 
     constructor(){
         this.init();
@@ -19,9 +25,18 @@ class App{
             paused: false,
             waiting: true //en caso de que esté esperando a hacer record
         }
+        this.recordingImg = document.getElementById('recording-img');
+        this.recentList = document.getElementById('recent-list');
+        this.likedList = document.getElementById('liked-list');
         this.timer = new Timer(document.getElementById('timer'));
 
         addFunctionalityRecordButton(this);
+        addFunctionalityChangeToRecordButton(this);
+        addFunctionalityCloudButton(this);
+        addFunctionalityDeleteRecordingButton(this);
+
+        this.addRecentListFunctionality();
+        this.addRecentListFunctionality();
     }
 
     async init(){
@@ -67,6 +82,9 @@ class App{
     loadBlob(audioBlob){
         let audioURL = URL.createObjectURL(audioBlob);
         this.audio.src = audioURL;
+
+        audioBlob.name = new Date().toUTCString().slice(4, 22);
+        this.addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.name);
     }
 
     async record(){
@@ -75,7 +93,9 @@ class App{
     }
 
     async stopRecording(){
-       await this.mediaRecorder.stop(); 
+        if(this.state.recording == true){
+            await this.mediaRecorder.stop(); 
+        }
     }
     
     async playAudio(){
@@ -97,14 +117,14 @@ class App{
     async setState(state) {
         const {recording, waiting, playing, paused} = this.state;
 
-        recordingImg.removeAttribute('class');
+        removeClassAtributeFromChangeToRecordButton();
 
         switch(true){
             case recording:
                 changeRecorderButtonAppareance(state, 'microphone', 'red');
                 this.changeRecordingImgAppareance('recording', 'normal');
-                //this.disablePlayControls();
-                await this.stopRecording();
+                this.disablePlayControls();
+                await this.reloadTimer();
                 this.timer.stopTimer();
                 this.timer.reloadTimer();
                 break;
@@ -117,9 +137,9 @@ class App{
             case playing:
                 changeRecorderButtonAppareance(state, 'play', 'green');
                 this.changeRecordingImgAppareance('playing', 'normal');
-                //this.enablePlayControls();
+                this.enablePlayControls();
                 this.stopAudio();
-                this.timer.continueTimer(audioPlayer);
+                this.timer.continueTimer(this.audio);
                 break;
             case paused:
                 changeRecorderButtonAppareance(state, 'paused', 'green');
@@ -129,6 +149,17 @@ class App{
         }
 
         this.state = Object.assign({}, this.state, state);
+    }
+
+    enablePlayControls(){
+        enableChangeToRecordButton();
+        enableCloudButton();
+        enableDeleteRecordingButton();
+    }
+    disablePlayControls(){
+        disableChangeToRecordButton();
+        disableCloudButton();
+        disableDeleteRecordingButton();
     }
 
     changeRecordingImgAppareance(icon, imgClass) {
@@ -141,282 +172,170 @@ class App{
     render(){
         //si eso en un futuro hacer que esto actualice lo visual y llamarlo desde setState
     }
-}
 
+    removeAudioWithPlayingClassIfExists(){
+        if (this.existsAudioWithPlayingClass()) {
+            this.removeAudioWithPlayingClass();
+        }
+    }
+    existsAudioWithPlayingClass() {
+        return this.getAudiosWithPlayingClass().length > 0;
+    }
+
+    removeAudioWithPlayingClass() {
+        this.getAudiosWithPlayingClass().forEach(audio => {
+            audio.classList.remove('playing');
+        })
+    }
+
+    getAudiosWithPlayingClass() {
+        return document.querySelectorAll('.playing');
+    }
+
+    publishFirstRecordingWithPlayingClass(){
+        publishRecording(this.getAudiosWithPlayingClass[0]);
+    }
+
+    publishRecording(audioEntry) {
+        audioEntry.parentNode.removeChild(audioEntry);
+        Array.from(audioEntry.children).forEach(c => {
+            if (c.classList.contains('publish-button')) {
+                c.parentNode.removeChild(c);
+            }
+        });
+    
+        const download = document.createElement('img');
+        download.setAttribute('src', 'icons/cloud-download.svg');
+        download.setAttribute('class', 'download-button');
+        audioEntry.appendChild(download);
+    
+        likedList.appendChild(audioEntry);
+        setRecorderState(recorderState.Record);
+    }
+
+    downloadFirstNodeWithPlayingClass(){
+        this.downloadAudioFromNode(this.getAudiosWithPlayingClass()[0]);
+    }
+
+    downloadAudioFromNode(audioEntryNode) {
+        const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
+        const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
+        addToLastRecordings(audioUrl, audioName)
+    }
+
+    addToLastRecordings(audioUrl, audioName) {
+        try {
+            const audioEntry = document.createElement('div');
+            audioEntry.setAttribute('class', 'audio-entry');
+
+            const play = document.createElement('img');
+            play.setAttribute('src', 'icons/play-audio-list.svg');
+            play.setAttribute('class', 'play-button');
+            play.setAttribute('data-audio', new URL(audioUrl));
+            audioEntry.appendChild(play);
+
+            const name = document.createElement('p');
+            name.setAttribute('class', 'audio-name');
+            name.innerHTML = audioName;
+            audioEntry.appendChild(name);
+
+            const publish = document.createElement('img');
+            publish.setAttribute('src', 'icons/cloud-upload.svg');
+            publish.setAttribute('class', 'publish-button');
+            audioEntry.appendChild(publish);
+
+            const remove = document.createElement('img');
+            remove.setAttribute('src', 'icons/delete.svg');
+            remove.setAttribute('class', 'remove-button');
+            audioEntry.appendChild(remove);
+            recentList.append(audioEntry);
+
+        }
+        catch (error) {
+            console.error('Error updating last recordings:', error);
+        }
+    }
+
+    deleteFirstAudioWithPlayingClass(){
+        deleteRecording(this.getAudiosWithPlayingClass()[0]);
+    }
+
+    deleteRecording(audioEntry) {
+        recordingImg.removeAttribute('class'); //puede que me haya equivocado y que esto sea lo que hay que hacer en todos los casos del switch
+        audioEntry.parentNode.removeChild(audioEntry);
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    addRecentListFunctionality(){
+        this.recentList.addEventListener('click', (e) => {
+            if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name') || e.target.classList.contains('audio-entry')) {
+                const audioEntry = e.target.closest('.audio-entry');
+                const audioUrl = this.getAudioEntryAudioURL(audioEntry);
+                setCloudButtonState({upload: true, download: false});
+                playTargetedAudio(audioEntry, audioUrl);
+            }
+            if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
+                const audioEntry = e.target.closest('.audio-entry');
+                deleteRecording(audioEntry);
+            }
+            if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
+                const audioEntry = e.target.closest('.audio-entry');
+                publishRecording(audioEntry)
+            }
+        });
+    }
+
+    getAudioEntryAudioURL(audioEntry) {
+        return audioEntry.querySelector('[data-audio]').dataset.audio;
+    }
+
+    playTargetedAudio(audioEntry, audioUrl) {
+        // Remove the 'playing' class from all audio entries
+        document.querySelectorAll('.audio-entry').forEach(entry => {
+            entry.classList.remove('playing');
+        });
+        audioEntry.classList.add('playing');
+        this.enableAudioPlay(audioUrl);
+    }
+
+    enableAudioPlay(audioUrl) {
+        this.setState({playing: true, waiting: false, paused: false, recording: false});
+        this.audio.src = audioUrl;
+    }
+
+    addLikedListFunctionality(){
+        this.likedList.addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-name')) {
+                const audioEntry = e.target.closest('.audio-entry');
+                const audioUrl = e.target.dataset.audio;
+                setCloudButtonState({upload: false, download: true});
+                this.playTargetedAudio(audioEntry, audioUrl);
+            }
+            if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
+                const audioEntry = e.target.closest('.audio-entry');
+                this.deleteRecording(audioEntry);
+            }
+            if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
+                const audioEntry = e.target.closest('.audio-entry');
+                this.donwloadAudioFromNode(audioEntry);
+            }
+        });
+    }
+    
+    donwloadAudioFromNode(audioEntryNode) {
+        const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
+        const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
+        this.addToLastRecordings(audioUrl, audioName)
+    }
+    
+
+}
 let app = new App();
 
-
-const recordingImg = document.getElementById('recording-img');
-const recentList = document.getElementById('recent-list');
-const likedList = document.getElementById('liked-list');
-const buttonRecordState = document.getElementById('imageBackToRecording');
-const buttonCloudActions = document.getElementById('imageCloudActions');
-const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
-const statusButtons = document.getElementById('status-buttons');
-
-let timer = new Timer(document.getElementById('timer'));
 let uuid;
-
-
-
-buttonRecordState.addEventListener('click', () => {
-    if (isRecording()) {
-
-    }
-    else {
-        setRecorderState(recorderState.Record);
-        if (existsAudioWithPlayingClass()) {
-            removeAudioWithPlayingClass();
-        }
-    }
-});
-
-const cloudActionState = {
-    Upload: 'upload button',
-    Download: 'download button',
-}
-
-function getCloudActionsBtnState() {
-    let alt = buttonCloudActions.getAttribute('alt');
-    switch (alt) {
-        case 'upload button': return cloudActionState.Upload;
-        case 'download button': return cloudActionState.Download;
-        default: return null;
-    }
-}
-
-function setCloudActionsBtnState(state) {
-    if (state == null) {
-        return;
-    }
-
-    switch (state) {
-        case cloudActionState.Upload:
-            buttonCloudActions.setAttribute('src', 'icons/cloud-upload.svg')
-            buttonCloudActions.setAttribute('alt', cloudActionState.Upload);
-            break;
-        case cloudActionState.Download:
-            buttonCloudActions.setAttribute('src', 'icons/cloud-download.svg')
-            buttonCloudActions.setAttribute('alt', cloudActionState.Download);
-            break;
-    }
-}
-
-buttonCloudActions.addEventListener('click', () => {
-    const state = getCloudActionsBtnState();
-    if (existsAudioWithPlayingClass() && state == cloudActionState.Upload) {
-        publishRecording(getAudiosWithPlayingClass()[0]);
-        removeAudioWithPlayingClass();
-    } else {
-        donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
-        setRecorderState(recorderState.Record);
-    }
-});
-
-buttonDeleteRecording.addEventListener('click', () => {
-    if (existsAudioWithPlayingClass()) {
-        deleteRecording(getAudiosWithPlayingClass()[0]);
-        removeAudioWithPlayingClass();
-    }
-});
-
-function existsAudioWithPlayingClass() {
-    return getAudiosWithPlayingClass().length > 0;
-}
-
-function removeAudioWithPlayingClass() {
-    getAudiosWithPlayingClass().forEach(audio => {
-        audio.classList.remove('playing');
-    })
-}
-
-function getAudiosWithPlayingClass() {
-    return document.querySelectorAll('.playing');
-}
-
-function deleteRecording(audioEntry) {
-    recordingImg.removeAttribute('class');
-    audioEntry.parentNode.removeChild(audioEntry);
-    timer.stopTimer();
-    timer.reloadTimer();
-    setRecorderState(recorderState.Record);
-}
-
-function publishRecording(audioEntry) {
-    audioEntry.parentNode.removeChild(audioEntry);
-    Array.from(audioEntry.children).forEach(c => {
-        if (c.classList.contains('publish-button')) {
-            c.parentNode.removeChild(c);
-        }
-    });
-
-    const download = document.createElement('img');
-    download.setAttribute('src', 'icons/cloud-download.svg');
-    download.setAttribute('class', 'download-button');
-    audioEntry.appendChild(download);
-
-    likedList.appendChild(audioEntry);
-    timer.stopTimer();
-    timer.reloadTimer();
-    setRecorderState(recorderState.Record);
-}
-
-async function startRecording() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPlayer.src = audioUrl;
-        };
-
-        mediaRecorder.start();
-    } catch (error) {
-        console.error('Error al acceder al micrófono:', error);
-    }
-}
-
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function stopRecording() {
-    if (isRecording()) {
-        await mediaRecorder.stop();
-        await sleep(30);
-        if (audioChunks.length > 0) {
-            stopTimerRecord();
-        }
-    }
-}
-
-function isRecording() {
-    return mediaRecorder && mediaRecorder.state === 'recording';
-}
-
-function stopTimerRecord() {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-    audioBlob.name = new Date().toUTCString().slice(4, 22);
-    addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.name);
-}
-
-
-function addToLastRecordings(audioUrl, audioName) {
-    try {
-        const audioEntry = document.createElement('div');
-        audioEntry.setAttribute('class', 'audio-entry');
-
-        const play = document.createElement('img');
-        play.setAttribute('src', 'icons/play-audio-list.svg');
-        play.setAttribute('class', 'play-button');
-        play.setAttribute('data-audio', new URL(audioUrl));
-        audioEntry.appendChild(play);
-
-        const name = document.createElement('p');
-        name.setAttribute('class', 'audio-name');
-        name.innerHTML = audioName;
-        audioEntry.appendChild(name);
-
-        const publish = document.createElement('img');
-        publish.setAttribute('src', 'icons/cloud-upload.svg');
-        publish.setAttribute('class', 'publish-button');
-        audioEntry.appendChild(publish);
-
-        const remove = document.createElement('img');
-        remove.setAttribute('src', 'icons/delete.svg');
-        remove.setAttribute('class', 'remove-button');
-        audioEntry.appendChild(remove);
-        recentList.append(audioEntry);
-
-    }
-    catch (error) {
-        console.error('Error updating last recordings:', error);
-    }
-}
-
-function playTargetedAudio(audioEntry, audioUrl) {
-    timer.stopTimer();
-    timer.reloadTimer();
-
-    // Remove the 'playing' class from all audio entries
-    document.querySelectorAll('.audio-entry').forEach(entry => {
-        entry.classList.remove('playing');
-    });
-    audioEntry.classList.add('playing');
-    recordingImg.removeAttribute('class');
-    enableAudioPlay(audioUrl);
-}
-
-function getAudioEntryAudioURL(audioEntry) {
-    return audioEntry.querySelector('[data-audio]').dataset.audio;
-}
-
-recentList.addEventListener('click', (e) => {
-    if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name') || e.target.classList.contains('audio-entry')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        const audioUrl = getAudioEntryAudioURL(audioEntry);
-        setCloudActionsBtnState(cloudActionState.Upload);
-        playTargetedAudio(audioEntry, audioUrl);
-    }
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        deleteRecording(audioEntry);
-    }
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        publishRecording(audioEntry)
-    }
-});
-
-likedList.addEventListener('click', (e) => {
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-name')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        const audioUrl = e.target.dataset.audio;
-        setCloudActionsBtnState(cloudActionState.Download);
-        playTargetedAudio(audioEntry, audioUrl);
-    }
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        deleteRecording(audioEntry);
-    }
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        donwloadAudioFromNode(audioEntry);
-    }
-});
-
-function donwloadAudioFromNode(audioEntryNode) {
-    const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
-    const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
-    addToLastRecordings(audioUrl, audioName)
-}
-
-function enableAudioPlay(audioUrl) {
-    setRecorderState(recorderState.Play);
-    audioPlayer.src = audioUrl;
-}
-
-function enablePlayControls() {
-    Array.from(statusButtons.children).forEach(c => {
-        c.classList.remove('disabled');
-    });
-}
-
-function disablePlayControls() {
-    Array.from(statusButtons.children).forEach(c => {
-        c.classList.add('disabled');
-    });
-}
 
 if (!localStorage.getItem("uuid")) {
 
