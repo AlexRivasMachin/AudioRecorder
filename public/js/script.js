@@ -85,9 +85,15 @@ recorder.addEventListener('click', async () => {
     if (state != null) {
         switch (state) {
             case recorderState.Record: {
-                setRecorderState(recorderState.Stop);
-                await startRecording();
-                timer.startTimer();
+                try {
+                    await startRecording();
+                    timer.startTimer();
+                    setRecorderBtnUnBlocked();
+                    setRecorderState(recorderState.Stop);
+                } catch {
+                    setRecorderBtnBlocked();
+                    alert('Porfavor permite que podamos usar el microfono');
+                }
                 return;
             };
             case recorderState.Stop: {
@@ -112,6 +118,14 @@ recorder.addEventListener('click', async () => {
         };
     };
 });
+
+function setRecorderBtnBlocked() {
+    recorder.classList.add('blocked');
+}
+
+function setRecorderBtnUnBlocked() {
+    recorder.classList.remove('blocked');
+}
 
 buttonRecordState.addEventListener('click', () => {
     if (isRecording()) {
@@ -235,7 +249,11 @@ async function startRecording() {
 
         mediaRecorder.start();
     } catch (error) {
-        console.error('Error al acceder al micrófono:', error);
+        if (error.name === 'NotAllowedError') {
+            throw error;
+        } else {
+            console.error('Error accessing the microphone:', error);
+        }
     }
 }
 
