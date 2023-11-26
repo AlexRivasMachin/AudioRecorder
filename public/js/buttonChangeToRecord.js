@@ -23,7 +23,7 @@ function addFunctionalityChangeToRecordButton(app){
 }
 
 function removeClassAtributeFromChangeToRecordButton(){
-    boton.removeAtribute('class');
+    boton.removeAttribute('class');
 }
 
 function disableChangeToRecordButton(){

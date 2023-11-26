@@ -117,14 +117,15 @@ class App{
     async setState(state) {
         const {recording, waiting, playing, paused} = this.state;
 
-        removeClassAtributeFromChangeToRecordButton();
+        this.recordingImg.removeAttribute('class');
+        //removeClassAtributeFromChangeToRecordButton();
 
         switch(true){
             case recording:
+                await this.stopRecording();
                 changeRecorderButtonAppareance(state, 'microphone', 'red');
                 this.changeRecordingImgAppareance('recording', 'normal');
                 this.disablePlayControls();
-                await this.reloadTimer();
                 this.timer.stopTimer();
                 this.timer.reloadTimer();
                 break;
@@ -163,9 +164,9 @@ class App{
     }
 
     changeRecordingImgAppareance(icon, imgClass) {
-        recordingImg.setAttribute('src', `icons/${icon}.svg`);
+        this.recordingImg.setAttribute('src', `icons/${icon}.svg`);
         if (imgClass == "parpadea") {
-            recordingImg.setAttribute('class', "parpadea");
+            this.recordingImg.setAttribute('class', "parpadea");
         }
     }
         
@@ -209,8 +210,8 @@ class App{
         download.setAttribute('class', 'download-button');
         audioEntry.appendChild(download);
     
-        likedList.appendChild(audioEntry);
-        setRecorderState(recorderState.Record);
+        this.likedList.appendChild(audioEntry);
+        this.setState({waiting: true, paused: false, playing: false});
     }
 
     downloadFirstNodeWithPlayingClass(){
@@ -220,7 +221,7 @@ class App{
     downloadAudioFromNode(audioEntryNode) {
         const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
         const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
-        addToLastRecordings(audioUrl, audioName)
+        this.addToLastRecordings(audioUrl, audioName)
     }
 
     addToLastRecordings(audioUrl, audioName) {
@@ -248,7 +249,7 @@ class App{
             remove.setAttribute('src', 'icons/delete.svg');
             remove.setAttribute('class', 'remove-button');
             audioEntry.appendChild(remove);
-            recentList.append(audioEntry);
+            this.recentList.append(audioEntry);
 
         }
         catch (error) {
@@ -261,7 +262,7 @@ class App{
     }
 
     deleteRecording(audioEntry) {
-        recordingImg.removeAttribute('class'); //puede que me haya equivocado y que esto sea lo que hay que hacer en todos los casos del switch
+        this.recordingImg.removeAttribute('class'); //puede que me haya equivocado y que esto sea lo que hay que hacer en todos los casos del switch
         audioEntry.parentNode.removeChild(audioEntry);
     }
 
@@ -275,15 +276,15 @@ class App{
                 const audioEntry = e.target.closest('.audio-entry');
                 const audioUrl = this.getAudioEntryAudioURL(audioEntry);
                 setCloudButtonState({upload: true, download: false});
-                playTargetedAudio(audioEntry, audioUrl);
+                this.playTargetedAudio(audioEntry, audioUrl);
             }
             if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
                 const audioEntry = e.target.closest('.audio-entry');
-                deleteRecording(audioEntry);
+                this.deleteRecording(audioEntry);
             }
             if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
                 const audioEntry = e.target.closest('.audio-entry');
-                publishRecording(audioEntry)
+                this.publishRecording(audioEntry)
             }
         });
     }
