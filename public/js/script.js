@@ -1,9 +1,151 @@
 import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
 
-const audioPlayer = document.getElementById('audio');
-const timer = new Timer(document.getElementById('timer'));
-const recorder = document.getElementById('recorder-status');
+import { addFunctionalityRecordButton, changeRecorderButtonAppareance } from "./buttonRecord.js";
+
+class App{
+
+    audio;
+    blob;
+    state;
+    mediaRecorder;
+    timer;
+
+    constructor(){
+        this.init();
+        this.state = {
+            recording: false,
+            playing: false,
+            paused: false,
+            waiting: true //en caso de que esté esperando a hacer record
+        }
+        this.timer = new Timer(document.getElementById('timer'));
+
+        addFunctionalityRecordButton(this);
+    }
+
+    async init(){
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        this.initAudio();
+        this.initRecord(stream);
+    }
+
+    initAudio(){
+        this.audio = document.getElementById("audio");
+
+        this.audio.addEventListener("loadedmetadata", () => {
+            console.log("metadata lodaded");
+        });
+        this.audio.addEventListener("durationchange", () => {
+            console.log("duration changed");
+        });
+        this.audio.addEventListener("timeupdate", () => {
+            console.log("time updated");
+        });
+        this.audio.addEventListener("ended", () => {
+            console.log("ended");
+        });
+    }
+
+    initRecord(stream){
+        this.mediaRecorder = new MediaRecorder(stream);
+        let audioChuncks = [];
+        console.log(`audio chunks actual: ${audioChuncks}`);
+
+        this.mediaRecorder.addEventListener('dataavailable', (event) => {
+            if(event.data.size > 0){
+               audioChuncks.push(event.data); 
+            }
+        });
+
+        this.mediaRecorder.addEventListener('stop', () => {
+            let audioBlob = new Blob(audioChuncks, {type: 'audio/wav'});
+            this.loadBlob(audioBlob);
+        });
+    }
+
+    loadBlob(audioBlob){
+        let audioURL = URL.createObjectURL(audioBlob);
+        this.audio.src = audioURL;
+    }
+
+    async record(){
+        await this.init();
+        await this.mediaRecorder.start();
+    }
+
+    async stopRecording(){
+       await this.mediaRecorder.stop(); 
+    }
+    
+    async playAudio(){
+        await this.audio.play();
+    }
+    
+    stopAudio(){
+        this.audio.pause();
+    }
+
+    upload(){
+
+    }
+
+    deleteFile(){
+
+    }
+
+    async setState(state) {
+        const {recording, waiting, playing, paused} = this.state;
+
+        recordingImg.removeAttribute('class');
+
+        switch(true){
+            case recording:
+                changeRecorderButtonAppareance(state, 'microphone', 'red');
+                this.changeRecordingImgAppareance('recording', 'normal');
+                //this.disablePlayControls();
+                await this.stopRecording();
+                this.timer.stopTimer();
+                this.timer.reloadTimer();
+                break;
+            case waiting:
+                changeRecorderButtonAppareance(state, 'stop', 'red');
+                this.changeRecordingImgAppareance('recording', 'parpadea');
+                await this.record();
+                this.timer.startTimer();
+                break;
+            case playing:
+                changeRecorderButtonAppareance(state, 'play', 'green');
+                this.changeRecordingImgAppareance('playing', 'normal');
+                //this.enablePlayControls();
+                this.stopAudio();
+                this.timer.continueTimer(audioPlayer);
+                break;
+            case paused:
+                changeRecorderButtonAppareance(state, 'paused', 'green');
+                this.changeRecordingImgAppareance('playing', 'parpadea');
+                this.timer.stopTimer();
+                await this.playAudio();
+        }
+
+        this.state = Object.assign({}, this.state, state);
+    }
+
+    changeRecordingImgAppareance(icon, imgClass) {
+        recordingImg.setAttribute('src', `icons/${icon}.svg`);
+        if (imgClass == "parpadea") {
+            recordingImg.setAttribute('class', "parpadea");
+        }
+    }
+        
+    render(){
+        //si eso en un futuro hacer que esto actualice lo visual y llamarlo desde setState
+    }
+}
+
+let app = new App();
+
+
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const likedList = document.getElementById('liked-list');
@@ -12,106 +154,10 @@ const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
 const statusButtons = document.getElementById('status-buttons');
 
-let mediaRecorder;
-let audioChunks = [];
+let timer = new Timer(document.getElementById('timer'));
 let uuid;
 
-// Mapping image alt with their state
-const recorderState = {
-    Record: 'record button',
-    Stop: 'stop button',
-    Play: 'play button',
-    Pause: 'pause button',
-}
 
-function getRecorderState() {
-    let alt = recorder.getAttribute('alt');
-    switch (alt) {
-        case 'record button': return recorderState.Record;
-        case 'stop button': return recorderState.Stop;
-        case 'play button': return recorderState.Play;
-        case 'pause button': return recorderState.Pause;
-        default: return null;
-    }
-}
-
-function setRecorderState(state) {
-    if (state == null) {
-        return;
-    }
-
-    recordingImg.removeAttribute('class');
-
-    switch (state) {
-
-        case recorderState.Record:
-            changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
-            disablePlayControls();
-            break;
-        case recorderState.Stop:
-            changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
-            break;
-        case recorderState.Play:
-            changeRecorderButtonAndRecordingImgAppearence(state, 'play', 'green', 'playing', 'normal');
-            enablePlayControls();
-            break;
-        case recorderState.Pause:
-            changeRecorderButtonAndRecordingImgAppearence(state, 'pause', 'green', 'playing', 'parpadea');
-            break;
-    }
-}
-function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, color, imgIcon, imgClass) {
-    changeRecorderButtonAppareance(state, recorderIcon, color);
-    changeRecordingImgAppareance(imgIcon, imgClass);
-}
-
-function changeRecorderButtonAppareance(state, icon, color) {
-    recorder.setAttribute('src', `icons/${icon}.svg`);
-    recorder.setAttribute('alt', state);
-    recorder.removeAttribute('class');
-    recorder.classList.add('animated-button', `${color}-animated-button`, 'rounded-button');
-}
-
-function changeRecordingImgAppareance(icon, imgClass) {
-    recordingImg.setAttribute('src', `icons/${icon}.svg`);
-    if (imgClass == "parpadea") {
-        recordingImg.setAttribute('class', "parpadea");
-    }
-}
-
-recorder.addEventListener('click', async () => {
-
-    let state = getRecorderState();
-    if (state != null) {
-        switch (state) {
-            case recorderState.Record: {
-                setRecorderState(recorderState.Stop);
-                timer.startTimer();
-                await startRecording();
-                return;
-            };
-            case recorderState.Stop: {
-                setRecorderState(recorderState.Record);
-                timer.stopTimer();
-                timer.reloadTimer();
-                await stopRecording();
-                return;
-            };
-            case recorderState.Play: {
-                setRecorderState(recorderState.Pause);
-                timer.continueTimer(audioPlayer);
-                audioPlayer.play();
-                return;
-            };
-            case recorderState.Pause: {
-                setRecorderState(recorderState.Play);
-                timer.stopTimer();
-                audioPlayer.pause();
-                return;
-            };
-        };
-    };
-});
 
 buttonRecordState.addEventListener('click', () => {
     if (isRecording()) {
