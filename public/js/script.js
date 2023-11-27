@@ -275,8 +275,7 @@ function actualizarServidorVisual(filesJson) {
         cloudList.removeChild(cloudList.firstChild);
     }
     filesJson.forEach(audio => {
-        const audioEntry = createAudioEntry('blob:http://localhost:5000/' + audio.filename, audio.date);
-        cloudList.appendChild(audioEntry);
+        addToCloudRecordings('blob:http://localhost:5000/' + audio.filename, audio.date);
     });
 }
 
@@ -387,6 +386,27 @@ function addToLastRecordings(audioUrl, audioDate) {
     }
     catch (error) {
         console.error('Error updating last recordings:', error);
+    }
+}
+
+function addToCloudRecordings(audioUrl, audioDate) {
+    try {
+        const audioEntry = createAudioEntry(audioUrl, audioDate);
+        Array.from(audioEntry.children).forEach(c => {
+            if (c.classList.contains('publish-button')) {
+                c.parentNode.removeChild(c);
+            }
+        });
+
+        const download = document.createElement('img');
+        download.setAttribute('src', 'icons/cloud-download.svg');
+        download.setAttribute('class', 'download-button');
+        audioEntry.appendChild(download);
+
+        cloudList.appendChild(audioEntry);
+    }
+    catch (error) {
+        console.error('Error updating cloud recordings:', error);
     }
 }
 
