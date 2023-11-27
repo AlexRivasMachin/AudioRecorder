@@ -50,52 +50,40 @@ function initAudio() {
     });
 }
 
-// Mapping image alt with their state
-const recorderState = {
-    Record: 'record button',
-    Stop: 'stop button',
-    Play: 'play button',
-    Pause: 'pause button',
+//application state
+let state = {
+    recording: false,
+    stoped: true,
+    playing: false, 
+    paused: false 
 }
 
-function getRecorderState() {
-    let alt = recorder.getAttribute('alt');
-    switch (alt) {
-        case 'record button': return recorderState.Record;
-        case 'stop button': return recorderState.Stop;
-        case 'play button': return recorderState.Play;
-        case 'pause button': return recorderState.Pause;
-        default: return null;
-    }
-}
-
-function setRecorderState(state) {
-    if (state == null) {
-        return;
-    }
-
+function setState(newState) {
     recordingImg.removeAttribute('class');
 
-    switch (state) {
+    state = Object.assign({}, state, newState);
+    const {recording, stoped, playing, paused} = state;
 
-        case recorderState.Record:
-            changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
+    switch (true) {
+
+        case recording:
+            changeRecorderButtonAndRecordingImgAppearence('recording', 'microphone', 'red', 'recording', 'normal');
             disablePlayControls();
             timer.stopTimer();
             timer.reloadTimer();
             break;
-        case recorderState.Stop:
+        case stoped:
             timer.startTimer();
-            changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
+            changeRecorderButtonAndRecordingImgAppearence('stoped', 'stop', 'red', 'recording', "parpadea");
             break;
-        case recorderState.Play:
+        case playing:
             timer.stopTimer();
-            changeRecorderButtonAndRecordingImgAppearence(state, 'play', 'green', 'playing', 'normal');
+            changeRecorderButtonAndRecordingImgAppearence('playing', 'play', 'green', 'playing', 'normal');
             enablePlayControls();
             break;
-        case recorderState.Pause:
+        case paused:
             timer.continueTimer(audioPlayer);
-            changeRecorderButtonAndRecordingImgAppearence(state, 'pause', 'green', 'playing', 'parpadea');
+            changeRecorderButtonAndRecordingImgAppearence('paused', 'pause', 'green', 'playing', 'parpadea');
             break;
     }
 }
@@ -120,35 +108,33 @@ function changeRecordingImgAppareance(icon, imgClass) {
 
 recorder.addEventListener('click', async () => {
 
-    let state = getRecorderState();
-    if (state != null) {
-        switch (state) {
-            case recorderState.Record: {
-                try {
-                    await startRecording();
-                    setRecorderBtnUnBlocked();
-                    setRecorderState(recorderState.Stop);
-                } catch {
-                    setRecorderBtnBlocked();
-                    alert('Porfavor permite que podamos usar el microfono');
-                }
-                return;
-            };
-            case recorderState.Stop: {
-                setRecorderState(recorderState.Record);
-                await stopRecording();
-                return;
-            };
-            case recorderState.Play: {
-                setRecorderState(recorderState.Pause);
-                audioPlayer.play();
-                return;
-            };
-            case recorderState.Pause: {
-                setRecorderState(recorderState.Play);
-                audioPlayer.pause();
-                return;
-            };
+    const {recording, stoped, paused, playing} = state;
+    switch (true) {
+        case recording: {
+            try {
+                await startRecording();
+                setRecorderBtnUnBlocked();
+                setState({recording: false, stoped: true});
+            } catch {
+                setRecorderBtnBlocked();
+                alert('Porfavor permite que podamos usar el microfono');
+            }
+            return;
+        };
+        case stoped: {
+            setState({stoped: false, recording: true});
+            await stopRecording();
+            return;
+        };
+        case playing: {
+            setState({playing: false, paused: true});
+            audioPlayer.play();
+            return;
+        };
+        case paused: {
+            setState({paused: false, playing: true});
+            audioPlayer.pause();
+            return;
         };
     };
 });
@@ -163,7 +149,7 @@ function setRecorderBtnUnBlocked() {
 
 buttonRecordState.addEventListener('click', () => {
     if (!isRecording()) {
-        setRecorderState(recorderState.Record);
+        setState({recording: true, playing: false, paused: false});
         if (existsAudioWithPlayingClass()) {
             removeAudioWithPlayingClass();
         }
@@ -208,7 +194,7 @@ buttonCloudActions.addEventListener('click', () => {
         removeAudioWithPlayingClass();
     } else {
         donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
-        setRecorderState(recorderState.Record);
+        setState({recording: true, paused: false, playing: false});
     }
 });
 
@@ -236,7 +222,7 @@ function getAudiosWithPlayingClass() {
 function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
-    setRecorderState(recorderState.Record);
+    setState({recording: true, paused: false, playing: false});
 }
 
 //sube visualmente un audioEntry al servidor
@@ -254,7 +240,7 @@ function publishRecording(audioEntry) {
     audioEntry.appendChild(download);
 
     cloudList.appendChild(audioEntry);
-    setRecorderState(recorderState.Record);
+    setState({recording: true, paused: false, playing: false, stoped: false});
 }
 
 //sube el audioEntry indicado al api/list y trás recibir la lista de audios los publica visualmente
@@ -475,7 +461,7 @@ function donwloadAudioFromNode(audioEntryNode) {
 }
 
 function enableAudioPlay(audioUrl) {
-    setRecorderState(recorderState.Play);
+    setState({playing: true, paused: false, stoped: false, recording: false});
     audioPlayer.src = audioUrl;
 }
 
