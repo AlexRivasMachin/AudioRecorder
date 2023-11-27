@@ -51,13 +51,16 @@ function setRecorderState(state) {
             timer.reloadTimer();
             break;
         case recorderState.Stop:
+            timer.startTimer();
             changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
             break;
         case recorderState.Play:
+            timer.stopTimer();
             changeRecorderButtonAndRecordingImgAppearence(state, 'play', 'green', 'playing', 'normal');
             enablePlayControls();
             break;
         case recorderState.Pause:
+            timer.continueTimer(audioPlayer);
             changeRecorderButtonAndRecordingImgAppearence(state, 'pause', 'green', 'playing', 'parpadea');
             break;
     }
@@ -89,7 +92,6 @@ recorder.addEventListener('click', async () => {
             case recorderState.Record: {
                 try {
                     await startRecording();
-                    timer.startTimer();
                     setRecorderBtnUnBlocked();
                     setRecorderState(recorderState.Stop);
                 } catch {
@@ -100,20 +102,16 @@ recorder.addEventListener('click', async () => {
             };
             case recorderState.Stop: {
                 setRecorderState(recorderState.Record);
-                timer.stopTimer();
-                timer.reloadTimer();
                 await stopRecording();
                 return;
             };
             case recorderState.Play: {
                 setRecorderState(recorderState.Pause);
-                timer.continueTimer(audioPlayer);
                 audioPlayer.play();
                 return;
             };
             case recorderState.Pause: {
                 setRecorderState(recorderState.Play);
-                timer.stopTimer();
                 audioPlayer.pause();
                 return;
             };
@@ -205,8 +203,6 @@ function getAudiosWithPlayingClass() {
 function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
-    timer.stopTimer();
-    timer.reloadTimer();
     setRecorderState(recorderState.Record);
 }
 
@@ -224,8 +220,6 @@ function publishRecording(audioEntry) {
     audioEntry.appendChild(download);
 
     likedList.appendChild(audioEntry);
-    timer.stopTimer();
-    timer.reloadTimer();
     setRecorderState(recorderState.Record);
 }
 
@@ -317,9 +311,6 @@ function addToLastRecordings(audioUrl, audioName) {
 }
 
 function playTargetedAudio(audioEntry, audioUrl) {
-    timer.stopTimer();
-    timer.reloadTimer();
-
     // Remove the 'playing' class from all audio entries
     document.querySelectorAll('.audio-entry').forEach(entry => {
         entry.classList.remove('playing');
