@@ -7,306 +7,120 @@
 ### ¿Que hace nuestra app?
 + Nuestra aplicación es una herramienta para la grabacíon y reproducción de audio.
 ### ¿Que elementos tiene?
-+ Tiene un menu de navegación vertical para tener información del audio y todo lo que pasa en todo momento. También el menu de reproducción es intercactivo y bla bla bla
++ Tiene un menu de navegación vertical para tener información del audio y todo lo que pasa en todo momento. También el menu de reproducción es intercactivo.
 
 ### Index.hmtl 🏗️
-### Style.css 💟
-### script.js 🐷
-Elementos que vamos a utilizar:
-+ audioPlayer
-+ timer
-+ recorder
-+ recordedTime
-+ recordingImg
-+ recentList
-+ likedList
-+ buttonRecordState
-+ buttonSaveRecording
-+ buttonDeleteRecording
+```
+    <section class="audio-area">
+      <div class="audio-toolbar">
+        <h1>Tus Audios</h1>
 
-Variables que vamos a usar:
-+ mediaRecorder
-+ audioChunks
-+ startTime
-+ timerInterval
-+ lastAudios
-+ RecordState:
+        <div class="recent">
+          <h3>Audios recientes</h3>
+          <div id="recent-list"></div>
+        </div>
+
+        <ul id="Recent Records"></ul>
+
+        <div class="liked">
+          <h3>Audios destacados</h3>
+          <div id="liked-list"></div>
+        </div>
+      </div>
+
+      <div class="audioElements">
+        <div class="audio-recorder">
+          <img
+            id="recorder-status"
+            class="animated-button red-animated-button rounded-button"
+            src="icons/microphone.svg"
+            alt="record button"
+          />
+          <div id="recorded-time">
+            <img id="recording-img" src="icons/recording.svg" width="25px" />
+            <h2 id="timer">00:00:00</h2>
+          </div>
+          <audio id="audio"></audio>
+        </div>
+
+        <div id="status-buttons">
+          <img
+            id="imageBackToRecording"
+            src="icons/back-to-record.svg"
+            class="state-button green-animated-button rounded-button disabled"
+          />
+          <img
+            id="imageCloudActions"
+            src="icons/cloud-upload.svg"
+            alt="upload button"
+            class="state-button button-with-background green-animated-button rounded-button disabled"
+          />
+          <img
+            id="imageDeleteRecording"
+            src="icons/delete.svg"
+            class="state-button button-with-background green-animated-button rounded-button disabled"
+          />
+        </div>
+      </div>
+    </section>
+```
+### JavaScript 🐷
+Antes la estructura de JS se basa en tres tipos de clases: El servidor , los scripts y las clases de objetos. Pese a tener qie usar clases de objetos por ahora solo tenemos la clase timer, debido a esto para la siguiente entrega del proyecto habrá una refactorización en varias clases para que quede mas claro el rol de cada cosa.
+#### APP.js
+Su objetivo es inicializar el servidor, tiene los "path" a los ficheros que va a usar. Esta desarrolado con express.js (un frameword de Node). Su código es simple por ahora: 
 ```JS
-const recorderState = {
-    Record: 'record button',
-    Stop: 'stop button',
-    Play: 'play button',
-    Pause: 'pause button',
+const express = require('express');
+const app = express();
+const path = require('path');
+const port = 5000;
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+```
+
+### Script.js
+Esta clase maneja el comportamiento de toda la app excepto el timer. Por una parte tenemos los métodos para --- y ---. Sabemos que la implementación no es exactamente la especifícada en el PDF a seguir, pero en cuanto a funcionalidad hemos cubierto todo. Para la siguiente versión del proyecto añadiremos o modificaremos los métodos como sea necesario.
+Para entender este código lo vamos a dividir en varias etapas: 
+#### 1. Import e inicialización de variables u objetos
+```JavaScript
+import uuidv4 from '../utils/uuid/v4.js';
+import Timer from './timer.js';
+
+const timer = new Timer(document.getElementById('timer'));
+const recorder = document.getElementById('recorder-status');
+const recordingImg = document.getElementById('recording-img');
+const recentList = document.getElementById('recent-list');
+const cloudList = document.getElementById('cloud-list');
+const buttonRecordState = document.getElementById('imageBackToRecording');
+const buttonCloudActions = document.getElementById('imageCloudActions');
+const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
+const statusButtons = document.getElementById('status-buttons');
+
+let audioPlayer;
+let mediaRecorder;
+let audioChunks = [];
+let uuid;
+```
+#### 2. Generación del UUID e inicialización
+```JavaScript
+//generar uuid
+if (!localStorage.getItem("uuid")) {
+
+    localStorage.setItem("uuid", uuidv4());
+
 }
+
+uuid = localStorage.getItem("uuid");
+console.log(uuid);
 ```
-## Información útil
-Para la gestion del audio vamos a utilizar objetos **blob:**
-### ¿Qué son los objetos Blobl?
-+ Sus siglas quieren decir **Binar Large Object**
-+ Son una estructura de datos que representa binario, se usa para contener datos binarios como audio o video.
-+ Su declaración seria algo tal que así:
-```JS
-const blob = new Blob([data], { options });
-```
-Por ejemplo:
-```JS
-const texto = "Hola, este es un ejemplo de texto.";
-const blobTexto = new Blob([texto], { type: 'text/plain' });
-```
-
-## Funciones
-### 1. getRecorderState:
-```JS
-function getRecorderState() {
-    let alt = recorder.getAttribute('alt');
-    switch (alt) {
-        case 'record button': return recorderState.Record;
-        case 'stop button': return recorderState.Stop;
-        case 'play button': return recorderState.Play;
-        case 'pause button': return recorderState.Pause;
-        default: return null;
-    }
-}
-```
-Sirve para obtener los datos de la grabación en ese momento.
-
-### 2. setRecorderState:
-```JS
-function setRecorderState(state) {
-    if (state != null) {
-        switch (state) {
-            case recorderState.Record: {
-                recorder.setAttribute('src', "icons/microphone.svg");
-                recorder.setAttribute('alt', state);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                recordingImg.removeAttribute('class');
-                recordingImg.setAttribute('src', "icons/recording.svg");
-                return;
-            };
-            case recorderState.Stop: {
-                recorder.setAttribute('src', "icons/stop.svg");
-                recorder.setAttribute('alt', state);
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'red-animated-button', 'rounded-button');
-                timer.removeAttribute('class');
-                recordingImg.setAttribute('class', "parpadea");
-                return;
-            };
-            case recorderState.Play: {
-                recorder.setAttribute('src', "icons/play.svg");
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
-                recorder.setAttribute('alt', state);
-                recordingImg.removeAttribute('class');
-                recordingImg.setAttribute('src', "icons/playing.svg");
-                return;
-            };
-            case recorderState.Pause: {
-                recorder.setAttribute('src', "icons/pause.svg");
-                recorder.removeAttribute('class');
-                recorder.classList.add('animated-button', 'green-animated-button', 'rounded-button');
-                recorder.setAttribute('alt', state);
-                recordingImg.setAttribute('class', "parpadea");
-                return;
-            };
-        };
-    };
-}
-```
-Se encarga de actualizar la apariencia y el estado del boton de grabación recorder.
-
-### 3. deleteRecording:
-```JS
-function deleteRecording(audioEntry) {
-    recordingImg.removeAttribute('class');
-    audioEntry.parentNode.removeChild(audioEntry);
-    stopTimer();
-    timer.textContent = '00:00:00';
-    setRecorderState(recorderState.Record);
-}
-```
-Tiene como parametro un audio, este lo elimina y detiene el timer.
-
-### 4. publishRecording:
-```JS
-function publishRecording(audioEntry) {
-    audioEntry.parentNode.removeChild(audioEntry);
-    likedList.appendChild(audioEntry);
-    stopTimer();
-    timer.textContent = '00:00:00';
-    setRecorderState(recorderState.Record);
-}
-```
-Tiene como parámetro un audio, al recibir este metodo la lista crea un li y lo añade. Tras esto reinicia el timer y pone el estado a grabar de nuevo.
-
-### 5. startRecording:
-```JS
-async function startRecording() {
-    timer.textContent = '00:00:00';
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        startTime = new Date().getTime();
-
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPlayer.src = audioUrl;
-            stopTimer();
-        };
-
-        mediaRecorder.start();
-
-        // Iniciamos el temporizador
-        startTimer();
-    } catch (error) {
-        console.error('Error al acceder al micrófono:', error);
-    }
-}
-```
-Función para comenzar a grabar,reseteamos el timer, luego usamos una API para solicitar permiso al microfono del usuario. Crea una instancia de media recorde con el flujo de audio que se esta introduciendo por el microfono. Inicializa un array para almacenar el audio.Luego guarda el momento de inicio.
-
-Fijarse que el timer inicia despues de que se de acceso al microfono.
-
-Creamos un controlador de eventos para el audio, este hace que cada vez quenhay nuevos datos, crea un chunk de audio mas y lo guarda en la lista.
-
-Tenemos también un controlador para ver cuando se para la grabación, crea un objeto Blob a partir de el audio, y se genera un URL para el objeto Blob. Y se establece esa URL como la fuente del elemento de audio (audioPlayer.src). y finalmente para el timer.
-
-### 6. sleep:
-```JS
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-```
-
-### 7. stopRecording:
-```JS
-async function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-        await mediaRecorder.stop();
-        // Si no espero un poco no actualiza la lista, no se porq falla el await anterior
-        await sleep(200);
-        // Detenemos el temporizador
-        stopTimer();
-        if (audioChunks.length > 0) {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            audioBlob.name = new Date().toUTCString().slice(5, 16);
-            addToLastRecordings(audioBlob);
-        }
-        timer.textContent = "00:00:00";
-    }
-}
-```
-Si la app esta grabando, para la grabación y el temporizador, ademas crea un Objeto Blob que guarda en la lista de las grabaciones recientes.
-
-### 8. startTimer:
-```JS
-function startTimer() {
-    // Inicia el temporizador
-    timer.textContent = '00:00:00';
-    timerInterval = setInterval(() => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            const currentTime = new Date().getTime();
-            const elapsedTime = Math.floor((currentTime - startTime) / 1000);
-            const hours = Math.floor(elapsedTime / 3600);
-            const minutes = Math.floor(elapsedTime / 60);
-            const seconds = elapsedTime % 60;
-            const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-            const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-            const formattedHours = hours < 10 ? `0${hours}` : hours;
-            timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-        }
-    }, 1000);
-}
-```
-Inicia el timer y ajusta el formato.
-
-### 9. stopTimer:
-```JS
-function stopTimer() {
-    // Detiene el temporizador
-    clearInterval(timerInterval);
-}
-```
-Detiene el temporizador.
-
-### 10. addToLastRecordings:
-```JS
-function addToLastRecordings(audio) {
-    try {
-        const audioEntry = document.createElement('div');
-        audioEntry.setAttribute('class', 'audio-entry');
-        const play = document.createElement('img');
-        play.setAttribute('src', 'icons/play-audio-list.svg');
-        play.setAttribute('class', 'play-button');
-        play.setAttribute('data-audio', URL.createObjectURL(audio));
-        audioEntry.appendChild(play);
-        const name = document.createElement('p');
-        name.setAttribute('class', 'audio-name');
-        name.innerHTML = audio.name;
-        audioEntry.appendChild(name);
-        const publish = document.createElement('img');
-        publish.setAttribute('src', 'icons/cloud-upload.svg');
-        publish.setAttribute('class', 'publish-button');
-        audioEntry.appendChild(publish);
-        const remove = document.createElement('img');
-        remove.setAttribute('src', 'icons/delete.svg');
-        remove.setAttribute('class', 'remove-button');
-        audioEntry.appendChild(remove);
-        recentList.append(audioEntry);
-    } catch (error) {
-        console.error('Error updating last recordings:', error);
-    }
-}
-```
-Se encarga de agregar una nueva entrada de audio a la lista de grabaciones recientes (recentList).
-
-## 11. enableAudioPlay:
-```JS
-function enableAudioPlay(audioUrl) {
-    setRecorderState(recorderState.Play);
-    audioPlayer.src = audioUrl;
-}
-```
-Permite iniciar una grabación.
-
-## 12. updateTimerWhilePlaying:
-```JS
-function updateTimerWhilePlaying() {
-    timer.textContent = '00:00:00';
-    // Inicia el temporizador
-    timerInterval = setInterval(() => {
-        const elapsedTime = Math.floor(audioPlayer.currentTime);
-        const hours = Math.floor(elapsedTime / 3600);
-        const minutes = Math.floor(elapsedTime / 60);
-        const seconds = elapsedTime % 60;
-        const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
-        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-        const formattedHours = hours < 10 ? `0${hours}` : hours;
-        timer.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-    }, 100);
-}
-```
-Actualiza el contador a medida que grabas.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#### 3. Inicialización del aduio y listeners de eventos
+#### 4. State del recorder y gestión de funciones
+#### 5. Gestión del estado en la nube
+#### 6. Función para gestión de las entradas de audio
+#### 7. Funciones para la grabación de audio
+#### 8. Listeners y lista de audios
