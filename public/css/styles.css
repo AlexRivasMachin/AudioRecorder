@@ -82,7 +82,7 @@ h3 {
   font-weight: 600;
 }
 
-.liked {
+.cloud {
   flex: 0 0 48%;
   margin: 10px;
   padding: 5px;
@@ -92,7 +92,7 @@ h3 {
   height: 50%;
 }
 
-.liked p {
+.cloud p {
   font-size: 14px;
   padding: 0px;
   font-weight: 700;
@@ -355,7 +355,7 @@ input[type="checkbox"] {
     max-width: 100%;
     min-height: 600px;
   }
-  .liked {
+  .cloud {
     max-height: 42%;
   }
   .recent {

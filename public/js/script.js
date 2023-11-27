@@ -5,7 +5,7 @@ const timer = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
 const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
-const likedList = document.getElementById('liked-list');
+const cloudList = document.getElementById('cloud-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
 const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
@@ -253,7 +253,7 @@ function publishRecording(audioEntry) {
     download.setAttribute('class', 'download-button');
     audioEntry.appendChild(download);
 
-    likedList.appendChild(audioEntry);
+    cloudList.appendChild(audioEntry);
     setRecorderState(recorderState.Record);
 }
 
@@ -271,12 +271,12 @@ function upload(audioEntry) {
 }
 
 function actualizarServidorVisual(filesJson) {
-    while (likedList.firstChild) {
-        likedList.removeChild(likedList.firstChild);
+    while (cloudList.firstChild) {
+        cloudList.removeChild(cloudList.firstChild);
     }
     filesJson.forEach(audio => {
         const audioEntry = createAudioEntry('blob:http://localhost:5000/' + audio.filename, audio.date);
-        likedList.appendChild(audioEntry);
+        cloudList.appendChild(audioEntry);
     });
 }
 
@@ -431,7 +431,7 @@ recentList.addEventListener('click', (e) => {
     }
 });
 
-likedList.addEventListener('click', (e) => {
+cloudList.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-date')) {
         const audioEntry = e.target.closest('.audio-entry');
         const audioUrl = e.target.dataset.audio;
