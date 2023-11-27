@@ -16,6 +16,19 @@ let mediaRecorder;
 let audioChunks = [];
 let uuid;
 
+//fetch después de window onload para mostrar audios en api list
+
+
+//generar uuid
+if (!localStorage.getItem("uuid")) {
+
+    localStorage.setItem("uuid", uuidv4());
+
+}
+
+uuid = localStorage.getItem("uuid");
+console.log(uuid);
+
 //Ejercicio 5 del pdf, no eliminar
 initAudio();
 function initAudio(){
@@ -225,6 +238,7 @@ function deleteRecording(audioEntry) {
     setRecorderState(recorderState.Record);
 }
 
+//sube visualmente un audioEntry al servidor
 function publishRecording(audioEntry) {
     audioEntry.parentNode.removeChild(audioEntry);
     Array.from(audioEntry.children).forEach(c => {
@@ -241,6 +255,34 @@ function publishRecording(audioEntry) {
     likedList.appendChild(audioEntry);
     setRecorderState(recorderState.Record);
 }
+
+//sube el audioEntry indicado al api/list y trás recibir la lista de audios los publica visualmente
+function upload(audioEntry){
+    const body = new FormData();
+    body.append("recording", getBlobFromAudioEntry(audioEntry));
+    fetch("/api/upload/" + uuid, {
+        method: "POST", 
+        body
+    })
+    .then(res => res.json()).then(json => {
+        actualizarServidorVisual(json.files);
+    })
+}
+
+function actualizarServidorVisual(filesJson){
+    filesJson.forEach(file => {
+        let audioEntry = createAudioEntry()
+    });
+}
+
+
+async function getBlobFromAudioEntry(){
+    const audioUrl = getAudioEntryAudioURL(audioEntry);
+    let blob = fetch(audioUrl).then(r => r.blob());
+    return blob;
+}
+
+
 
 async function startRecording() {
     try {
@@ -295,9 +337,7 @@ function stopTimerRecord() {
     addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.name);
 }
 
-
-function addToLastRecordings(audioUrl, audioName) {
-    try {
+function createAudioEntry(audioUrl, audioName){
         const audioEntry = document.createElement('div');
         audioEntry.setAttribute('class', 'audio-entry');
 
@@ -321,8 +361,41 @@ function addToLastRecordings(audioUrl, audioName) {
         remove.setAttribute('src', 'icons/delete.svg');
         remove.setAttribute('class', 'remove-button');
         audioEntry.appendChild(remove);
-        recentList.append(audioEntry);
 
+        return audioEntry;
+}
+//crear audioEntry que no se puede escuchar (sin url)
+function createAudioEntry(audioName){
+        const audioEntry = document.createElement('div');
+        audioEntry.setAttribute('class', 'audio-entry');
+
+        const play = document.createElement('img');
+        play.setAttribute('src', 'icons/play-audio-list.svg');
+        play.setAttribute('class', 'play-button');
+        audioEntry.appendChild(play);
+
+        const name = document.createElement('p');
+        name.setAttribute('class', 'audio-name');
+        name.innerHTML = audioName;
+        audioEntry.appendChild(name);
+
+        const publish = document.createElement('img');
+        publish.setAttribute('src', 'icons/cloud-upload.svg');
+        publish.setAttribute('class', 'publish-button');
+        audioEntry.appendChild(publish);
+
+        const remove = document.createElement('img');
+        remove.setAttribute('src', 'icons/delete.svg');
+        remove.setAttribute('class', 'remove-button');
+        audioEntry.appendChild(remove);
+
+        return audioEntry;
+}
+
+function addToLastRecordings(audioUrl, audioName) {
+    try {
+        const audioEntry = createAudioEntry(audioUrl, audioName);
+        recentList.append(audioEntry);
     }
     catch (error) {
         console.error('Error updating last recordings:', error);
@@ -356,7 +429,8 @@ recentList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
-        publishRecording(audioEntry)
+        //lo subirá al api/list y si no está en local lo publica
+        upload(audioEntry);
     }
 });
 
@@ -400,11 +474,4 @@ function disablePlayControls() {
     });
 }
 
-if (!localStorage.getItem("uuid")) {
 
-    localStorage.setItem("uuid", uuidv4()); // genera y gaurda el uuid
-
-} // si no está almacenado en localStorage
-
-uuid = localStorage.getItem("uuid"); // logra el uuid desdelocalStorage
-console.log(uuid);
