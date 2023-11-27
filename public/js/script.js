@@ -1,7 +1,6 @@
 import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
 
-const audioPlayer = document.getElementById('audio');
 const timer = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
 const recordingImg = document.getElementById('recording-img');
@@ -12,9 +11,29 @@ const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
 const statusButtons = document.getElementById('status-buttons');
 
+let audioPlayer;
 let mediaRecorder;
 let audioChunks = [];
 let uuid;
+
+//Ejercicio 5 del pdf, no eliminar
+initAudio();
+function initAudio(){
+    audioPlayer = document.getElementById("audio");
+
+    audioPlayer.addEventListener("loadedmetadata", () => {
+        console.log("metadata lodaded");
+    });
+    audioPlayer.addEventListener("durationchange", () => {
+        console.log("duration changed");
+    });
+    audioPlayer.addEventListener("timeupdate", () => {
+        console.log("time updated");
+    });
+    audioPlayer.addEventListener("ended", () => {
+        console.log("ended");
+    });
+}
 
 // Mapping image alt with their state
 const recorderState = {
