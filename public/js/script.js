@@ -33,7 +33,7 @@ getRemoteAudioList();
 
 //Ejercicio 5 del pdf, no eliminar
 initAudio();
-function initAudio(){
+function initAudio() {
     audioPlayer = document.getElementById("audio");
 
     audioPlayer.addEventListener("loadedmetadata", () => {
@@ -205,7 +205,6 @@ function setCloudActionsBtnState(state) {
 buttonCloudActions.addEventListener('click', () => {
     const state = getCloudActionsBtnState();
     if (existsAudioWithPlayingClass() && state == cloudActionState.Upload) {
-        publishRecording(getAudiosWithPlayingClass()[0]);
         removeAudioWithPlayingClass();
     } else {
         donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
@@ -259,16 +258,16 @@ function publishRecording(audioEntry) {
 }
 
 //sube el audioEntry indicado al api/list y trás recibir la lista de audios los publica visualmente
-function upload(audioEntry){
+function upload(audioEntry) {
     const body = new FormData();
     body.append("recording", getBlobFromAudioEntry(audioEntry));
     fetch("/api/upload/" + uuid, {
-        method: "POST", 
+        method: "POST",
         body
     })
-    .then(res => res.json()).then(json => {
-        actualizarServidorVisual(json.files);
-    })
+        .then(res => res.json()).then(json => {
+            actualizarServidorVisual(json.files);
+        })
 }
 
 function actualizarServidorVisual(filesJson) {
@@ -285,7 +284,6 @@ function getRemoteAudioList() {
     fetch('/api/list')
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             actualizarServidorVisual(data.files);
         })
         .catch(error => console.error(error));
@@ -342,41 +340,49 @@ function isRecording() {
 
 function stopTimerRecord() {
     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-    audioBlob.name = new Date().toUTCString().slice(4, 22);
-    addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.name);
+    audioBlob.date = new Date().getTime();
+    addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.date);
 }
 
-function createAudioEntry(audioUrl, audioName){
-        const audioEntry = document.createElement('div');
-        audioEntry.setAttribute('class', 'audio-entry');
+function createAudioEntry(audioUrl, audioDate) {
+    const audioEntry = document.createElement('div');
+    audioEntry.setAttribute('class', 'audio-entry');
 
-        const play = document.createElement('img');
-        play.setAttribute('src', 'icons/play-audio-list.svg');
-        play.setAttribute('class', 'play-button');
-        play.setAttribute('data-audio', new URL(audioUrl));
-        audioEntry.appendChild(play);
+    const play = document.createElement('img');
+    play.setAttribute('src', 'icons/play-audio-list.svg');
+    play.setAttribute('class', 'play-button');
+    play.setAttribute('data-audio', new URL(audioUrl));
+    audioEntry.appendChild(play);
 
-        const name = document.createElement('p');
-        name.setAttribute('class', 'audio-name');
-        name.innerHTML = audioName;
-        audioEntry.appendChild(name);
+    const date = document.createElement('p');
+    date.setAttribute('class', 'audio-date');
+    moment.locale('es');
+    date.innerHTML = moment(audioDate).calendar(null, {
+        sameDay: '[hoy] h:mm A',
+        nextDay: '[mañana] h:mm A',
+        nextWeek: 'dddd h:mm A',
+        lastDay: '[ayer] h:mm A',
+        lastWeek: 'dddd h:mm A',
+        sameElse: 'DD/MM/YYYY h:mm A'
+    });
+    audioEntry.appendChild(date);
 
-        const publish = document.createElement('img');
-        publish.setAttribute('src', 'icons/cloud-upload.svg');
-        publish.setAttribute('class', 'publish-button');
-        audioEntry.appendChild(publish);
+    const publish = document.createElement('img');
+    publish.setAttribute('src', 'icons/cloud-upload.svg');
+    publish.setAttribute('class', 'publish-button');
+    audioEntry.appendChild(publish);
 
-        const remove = document.createElement('img');
-        remove.setAttribute('src', 'icons/delete.svg');
-        remove.setAttribute('class', 'remove-button');
-        audioEntry.appendChild(remove);
+    const remove = document.createElement('img');
+    remove.setAttribute('src', 'icons/delete.svg');
+    remove.setAttribute('class', 'remove-button');
+    audioEntry.appendChild(remove);
 
-        return audioEntry;
+    return audioEntry;
 }
 
-function addToLastRecordings(audioUrl, audioName) {
+function addToLastRecordings(audioUrl, audioDate) {
     try {
-        const audioEntry = createAudioEntry(audioUrl, audioName);
+        const audioEntry = createAudioEntry(audioUrl, audioDate);
         recentList.append(audioEntry);
     }
     catch (error) {
@@ -404,11 +410,11 @@ function getAudioEntryFilename(audioEntry) {
 }
 
 function getAudioEntryDate(audioEntry) {
-    return audioEntry.querySelector('.audio-name').textContent;
+    return audioEntry.querySelector('.audio-date').textContent;
 }
 
 recentList.addEventListener('click', (e) => {
-    if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-name') || e.target.classList.contains('audio-entry')) {
+    if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-date') || e.target.classList.contains('audio-entry')) {
         const audioEntry = e.target.closest('.audio-entry');
         const audioUrl = getAudioEntryAudioURL(audioEntry);
         setCloudActionsBtnState(cloudActionState.Upload);
@@ -426,7 +432,7 @@ recentList.addEventListener('click', (e) => {
 });
 
 likedList.addEventListener('click', (e) => {
-    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-name')) {
+    if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-date')) {
         const audioEntry = e.target.closest('.audio-entry');
         const audioUrl = e.target.dataset.audio;
         setCloudActionsBtnState(cloudActionState.Download);
@@ -443,9 +449,9 @@ likedList.addEventListener('click', (e) => {
 });
 
 function donwloadAudioFromNode(audioEntryNode) {
-    const audioName = audioEntryNode.querySelector('.audio-name').innerHTML;
+    const audioDate = audioEntryNode.querySelector('.audio-date').innerHTML;
     const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
-    addToLastRecordings(audioUrl, audioName)
+    addToLastRecordings(audioUrl, audioDate)
 }
 
 function enableAudioPlay(audioUrl) {
