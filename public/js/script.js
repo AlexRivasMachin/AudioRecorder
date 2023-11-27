@@ -160,6 +160,10 @@ buttonRecordState.addEventListener('click', () => {
         }
 
     }
+    else{
+        setState({recording: false, playing: false, paused: false});
+        stopRecording();
+    }
 });
 
 const cloudActionState = {
