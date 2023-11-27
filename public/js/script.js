@@ -29,6 +29,8 @@ if (!localStorage.getItem("uuid")) {
 uuid = localStorage.getItem("uuid");
 console.log(uuid);
 
+getRemoteAudioList();
+
 //Ejercicio 5 del pdf, no eliminar
 initAudio();
 function initAudio(){
@@ -269,17 +271,24 @@ function upload(audioEntry){
     })
 }
 
-function actualizarServidorVisual(filesJson){
-    filesJson.forEach(file => {
-        let audioEntry = createAudioEntry()
+function actualizarServidorVisual(filesJson) {
+    while (likedList.firstChild) {
+        likedList.removeChild(likedList.firstChild);
+    }
+    filesJson.forEach(audio => {
+        const audioEntry = createAudioEntry('blob:http://localhost:5000/' + audio.filename, audio.date);
+        likedList.appendChild(audioEntry);
     });
 }
 
-
-async function getBlobFromAudioEntry(){
-    const audioUrl = getAudioEntryAudioURL(audioEntry);
-    let blob = fetch(audioUrl).then(r => r.blob());
-    return blob;
+function getRemoteAudioList() {
+    fetch('/api/list')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            actualizarServidorVisual(data.files);
+        })
+        .catch(error => console.error(error));
 }
 
 
@@ -364,33 +373,6 @@ function createAudioEntry(audioUrl, audioName){
 
         return audioEntry;
 }
-//crear audioEntry que no se puede escuchar (sin url)
-function createAudioEntry(audioName){
-        const audioEntry = document.createElement('div');
-        audioEntry.setAttribute('class', 'audio-entry');
-
-        const play = document.createElement('img');
-        play.setAttribute('src', 'icons/play-audio-list.svg');
-        play.setAttribute('class', 'play-button');
-        audioEntry.appendChild(play);
-
-        const name = document.createElement('p');
-        name.setAttribute('class', 'audio-name');
-        name.innerHTML = audioName;
-        audioEntry.appendChild(name);
-
-        const publish = document.createElement('img');
-        publish.setAttribute('src', 'icons/cloud-upload.svg');
-        publish.setAttribute('class', 'publish-button');
-        audioEntry.appendChild(publish);
-
-        const remove = document.createElement('img');
-        remove.setAttribute('src', 'icons/delete.svg');
-        remove.setAttribute('class', 'remove-button');
-        audioEntry.appendChild(remove);
-
-        return audioEntry;
-}
 
 function addToLastRecordings(audioUrl, audioName) {
     try {
@@ -414,6 +396,15 @@ function playTargetedAudio(audioEntry, audioUrl) {
 
 function getAudioEntryAudioURL(audioEntry) {
     return audioEntry.querySelector('[data-audio]').dataset.audio;
+}
+
+function getAudioEntryFilename(audioEntry) {
+    const url = getAudioEntryAudioURL(audioEntry);
+    return url.split('/').pop();
+}
+
+function getAudioEntryDate(audioEntry) {
+    return audioEntry.querySelector('.audio-name').textContent;
 }
 
 recentList.addEventListener('click', (e) => {

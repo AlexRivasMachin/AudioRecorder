@@ -9,4 +9,8 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/api/list', (req, res) => {
+    res.sendFile(path.join(__dirname, 'api/list/index.html'));
+});
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
