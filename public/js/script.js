@@ -47,6 +47,8 @@ function setRecorderState(state) {
         case recorderState.Record:
             changeRecorderButtonAndRecordingImgAppearence(state, 'microphone', 'red', 'recording', 'normal');
             disablePlayControls();
+            timer.stopTimer();
+            timer.reloadTimer();
             break;
         case recorderState.Stop:
             changeRecorderButtonAndRecordingImgAppearence(state, 'stop', 'red', 'recording', "parpadea");
@@ -128,14 +130,12 @@ function setRecorderBtnUnBlocked() {
 }
 
 buttonRecordState.addEventListener('click', () => {
-    if (isRecording()) {
-
-    }
-    else {
+    if (!isRecording()) {
         setRecorderState(recorderState.Record);
         if (existsAudioWithPlayingClass()) {
             removeAudioWithPlayingClass();
         }
+
     }
 });
 
