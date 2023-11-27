@@ -59,15 +59,15 @@ function initAudio() {
 let state = {
     recording: false,
     stoped: true,
-    playing: false, 
-    paused: false 
+    playing: false,
+    paused: false
 }
 
 function setState(newState) {
     recordingImg.removeAttribute('class');
 
     state = Object.assign({}, state, newState);
-    const {recording, stoped, playing, paused} = state;
+    const { recording, stoped, playing, paused } = state;
 
     switch (true) {
 
@@ -113,13 +113,13 @@ function changeRecordingImgAppareance(icon, imgClass) {
 
 recorder.addEventListener('click', async () => {
 
-    const {recording, stoped, paused, playing} = state;
+    const { recording, stoped, paused, playing } = state;
     switch (true) {
         case recording: {
             try {
                 await startRecording();
                 setRecorderBtnUnBlocked();
-                setState({recording: false, stoped: true});
+                setState({ recording: false, stoped: true });
             } catch {
                 setRecorderBtnBlocked();
                 alert('Porfavor permite que podamos usar el microfono');
@@ -127,17 +127,17 @@ recorder.addEventListener('click', async () => {
             return;
         };
         case stoped: {
-            setState({stoped: false, recording: true});
+            setState({ stoped: false, recording: true });
             await stopRecording();
             return;
         };
         case playing: {
-            setState({playing: false, paused: true});
+            setState({ playing: false, paused: true });
             audioPlayer.play();
             return;
         };
         case paused: {
-            setState({paused: false, playing: true});
+            setState({ paused: false, playing: true });
             audioPlayer.pause();
             return;
         };
@@ -154,14 +154,14 @@ function setRecorderBtnUnBlocked() {
 
 buttonRecordState.addEventListener('click', () => {
     if (!isRecording()) {
-        setState({recording: true, playing: false, paused: false});
+        setState({ recording: true, playing: false, paused: false });
         if (existsAudioWithPlayingClass()) {
             removeAudioWithPlayingClass();
         }
 
     }
-    else{
-        setState({recording: false, playing: false, paused: false});
+    else {
+        setState({ recording: false, playing: false, paused: false });
         stopRecording();
     }
 });
@@ -203,7 +203,7 @@ buttonCloudActions.addEventListener('click', () => {
         removeAudioWithPlayingClass();
     } else {
         donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
-        setState({recording: true, paused: false, playing: false});
+        setState({ recording: true, paused: false, playing: false });
     }
 });
 
@@ -239,7 +239,7 @@ function getAudiosWithPlayingClass() {
 function deleteRecording(audioEntry) {
     recordingImg.removeAttribute('class');
     audioEntry.parentNode.removeChild(audioEntry);
-    setState({recording: true, paused: false, playing: false});
+    setState({ recording: true, paused: false, playing: false });
 }
 
 //sube visualmente un audioEntry al servidor
@@ -257,20 +257,29 @@ function publishRecording(audioEntry) {
     audioEntry.appendChild(download);
 
     cloudList.appendChild(audioEntry);
-    setState({recording: true, paused: false, playing: false, stoped: false});
+    setState({ recording: true, paused: false, playing: false, stoped: false });
 }
 
 //sube el audioEntry indicado al api/list y trás recibir la lista de audios los publica visualmente
-function upload(audioEntry) {
-    const body = new FormData();
-    body.append("recording", getBlobFromAudioEntry(audioEntry));
-    fetch("/api/upload/" + uuid, {
-        method: "POST",
-        body
+function upload() {
+    setState({ uploading: true }); // estado actual: uploading
+    const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
+    body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
+    fetch("/api/upload/" + this.uuid, {
+        method: "POST", // usaremos el método POST para subir el audio
+        body,
     })
-        .then(res => res.json()).then(json => {
-            actualizarServidorVisual(json.files);
+        .then((res) => res.json()) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
+        .then((json) => {
+            setState({
+                files: json.files, // todos los ficheros del usuario
+                uploading: false, // actualizar el estado actual
+                uploaded: true, // actualizar estado actual
+            });
         })
+        .catch((err) => {
+            this.setState({ error: true });
+        });
 }
 
 function actualizarServidorVisual(filesJson) {
@@ -450,7 +459,7 @@ recentList.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         const audioEntry = e.target.closest('.audio-entry');
         //lo subirá al api/list y si no está en local lo publica
-        upload(audioEntry);
+        upload();
     }
 });
 
@@ -478,7 +487,7 @@ function donwloadAudioFromNode(audioEntryNode) {
 }
 
 function enableAudioPlay(audioUrl) {
-    setState({playing: true, paused: false, stoped: false, recording: false});
+    setState({ playing: true, paused: false, stoped: false, recording: false });
     audioPlayer.src = audioUrl;
 }
 
