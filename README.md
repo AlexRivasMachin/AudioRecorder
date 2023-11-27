@@ -65,7 +65,7 @@
     </section>
 ```
 ### JavaScript 🐷
-Antes la estructura de JS se basa en tres tipos de clases: El servidor , los scripts y las clases de objetos. Pese a tener qie usar clases de objetos por ahora solo tenemos la clase timer, debido a esto para la siguiente entrega del proyecto habrá una refactorización en varias clases para que quede mas claro el rol de cada cosa.
+Antes la estructura de JS se basa en tres tipos de clases: El servidor , los scripts y las clases de objetos. Pese a tener que usar clases de objetos por ahora solo tenemos la clase timer, debido a esto para la siguiente entrega del proyecto habrá una refactorización en varias clases para que quede mas claro el rol de cada cosa. El botón para compartir el audio si que está en una clase aparte, ya que lo hemos implementado recientemente.
 #### APP.js
 Su objetivo es inicializar el servidor, tiene los "path" a los ficheros que va a usar. Esta desarrolado con express.js (un frameword de Node). Su código es simple por ahora: 
 ```JS
@@ -90,6 +90,7 @@ Para entender este código lo vamos a dividir en varias etapas:
 ```JavaScript
 import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
+import ShareBtn from '../js/shareButton.js';
 
 const timer = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
@@ -99,12 +100,15 @@ const cloudList = document.getElementById('cloud-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
 const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
+const buttonShareRecordingInstance = new ShareBtn();
 const statusButtons = document.getElementById('status-buttons');
 
 let audioPlayer;
 let mediaRecorder;
 let audioChunks = [];
 let uuid;
+
+const buttonShareRecording = statusButtons.appendChild(buttonShareRecordingInstance.img);
 ```
 #### 2. Generación del UUID e inicialización
 ```JavaScript
@@ -118,7 +122,7 @@ if (!localStorage.getItem("uuid")) {
 uuid = localStorage.getItem("uuid");
 console.log(uuid);
 ```
-#### 3. Inicialización del aduio y listeners de eventos
+#### 3. Inicialización del audio y listeners de eventos
 #### 4. State del recorder y gestión de funciones
 #### 5. Gestión del estado en la nube
 #### 6. Función para gestión de las entradas de audio
