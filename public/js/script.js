@@ -1,5 +1,6 @@
 import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
+import ShareBtn from '../js/shareButton.js';
 
 const timer = new Timer(document.getElementById('timer'));
 const recorder = document.getElementById('recorder-status');
@@ -9,12 +10,16 @@ const cloudList = document.getElementById('cloud-list');
 const buttonRecordState = document.getElementById('imageBackToRecording');
 const buttonCloudActions = document.getElementById('imageCloudActions');
 const buttonDeleteRecording = document.getElementById('imageDeleteRecording');
+const buttonShareRecordingInstance = new ShareBtn();
 const statusButtons = document.getElementById('status-buttons');
 
 let audioPlayer;
 let mediaRecorder;
 let audioChunks = [];
 let uuid;
+
+// load buttons
+const buttonShareRecording = statusButtons.appendChild(buttonShareRecordingInstance.img);
 
 //fetch después de window onload para mostrar audios en api list
 
@@ -204,6 +209,14 @@ buttonDeleteRecording.addEventListener('click', () => {
         removeAudioWithPlayingClass();
     }
 });
+
+buttonShareRecording.addEventListener('click', () => {
+    if (existsAudioWithPlayingClass()) {
+        const audioEntry = getAudiosWithPlayingClass()[0];
+        const audioEntryHttpUrl = getAudioEntryAudioURL(audioEntry).substring(5);
+        buttonShareRecordingInstance.copyUrlToClipboard(audioEntryHttpUrl);
+    }
+})
 
 function existsAudioWithPlayingClass() {
     return getAudiosWithPlayingClass().length > 0;
