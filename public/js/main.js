@@ -5,6 +5,7 @@ import deleteBtn from '../js/deleteButton.js';
 import recorderBtn from '../js/recorderButton.js'
 import cloudActionsBtn from './cloudActionsButton.js';
 import backToRecordingBtn from './backToRecordingButton.js';
+import audioEntry from './audioEntry.js';
 
 const timer = new Timer(document.getElementById('timer'));
 const recordedTimeDiv = document.getElementById('recorded-time');
@@ -110,7 +111,7 @@ let state = {
 }
 
 function setState(newState) {
-    recordingImg.removeAttribute('class');
+    recordingImg.classList.remove("parpadea");
 
     state = Object.assign({}, state, newState);
     const { recording, stoped, playing, paused } = state;
@@ -146,7 +147,7 @@ function changeRecorderButtonAndRecordingImgAppearence(state, recorderIcon, colo
 function changeRecordingImgAppearence(icon, imgClass) {
     recordingImg.setAttribute('src', `icons/${icon}.svg`);
     if (imgClass == "parpadea") {
-        recordingImg.setAttribute('class', "parpadea");
+        recordingImg.classList.add(imgClass);
     }
 }
 
@@ -221,8 +222,8 @@ deleteRecordingBtnImg.addEventListener('click', () => {
 
 shareRecordingBtnImg.addEventListener('click', () => {
     if (existsAudioWithPlayingClass()) {
-        const audioEntry = getAudiosWithPlayingClass()[0];
-        const audioEntryHttpUrl = getAudioEntryAudioURL(audioEntry).substring(5);
+        const audioEntryDiv = getAudiosWithPlayingClass()[0];
+        const audioEntryHttpUrl = getAudioEntryDivAudioURL(audioEntryDiv).substring(5);
         shareRecordingBtnInstance.copyUrlToClipboard(audioEntryHttpUrl);
     }
 })
@@ -241,27 +242,27 @@ function getAudiosWithPlayingClass() {
     return document.querySelectorAll('.playing');
 }
 
-function deleteRecording(audioEntry) {
-    recordingImg.removeAttribute('class');
-    audioEntry.parentNode.removeChild(audioEntry);
+function deleteRecording(audioEntryDiv) {
+    recordingImg.classList.remove("parpadea");
+    audioEntryDiv.parentNode.removeChild(audioEntryDiv);
     setState({ recording: true, paused: false, playing: false });
 }
 
 //sube visualmente un audioEntry al servidor
-function publishRecording(audioEntry) {
-    audioEntry.parentNode.removeChild(audioEntry);
-    Array.from(audioEntry.children).forEach(c => {
+function publishRecording(audioEntryDiv) {
+    audioEntryDiv.parentNode.removeChild(audioEntryDiv);
+    Array.from(audioEntryDiv.children).forEach(c => {
         if (c.classList.contains('publish-button')) {
             c.parentNode.removeChild(c);
         }
     });
 
     const download = document.createElement('img');
-    download.setAttribute('src', 'icons/cloud-download.svg');
-    download.setAttribute('class', 'download-button');
-    audioEntry.appendChild(download);
+    download.src = 'icons/cloud-download.svg';
+    download.classList.add('download-button');
+    audioEntryDiv.appendChild(download);
 
-    cloudList.appendChild(audioEntry);
+    cloudList.appendChild(audioEntryDiv);
     setState({ recording: true, paused: false, playing: false, stoped: false });
 }
 
@@ -360,46 +361,10 @@ function stopTimerRecord() {
     addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.date);
 }
 
-function createAudioEntry(audioUrl, audioDate) {
-    const audioEntry = document.createElement('div');
-    audioEntry.setAttribute('class', 'audio-entry');
-
-    const play = document.createElement('img');
-    play.setAttribute('src', 'icons/play-audio-list.svg');
-    play.setAttribute('class', 'play-button');
-    play.setAttribute('data-audio', new URL(audioUrl));
-    audioEntry.appendChild(play);
-
-    const date = document.createElement('p');
-    date.setAttribute('class', 'audio-date');
-    moment.locale('es');
-    date.innerHTML = moment(audioDate).calendar(null, {
-        sameDay: '[hoy] h:mm A',
-        nextDay: '[mañana] h:mm A',
-        nextWeek: 'dddd h:mm A',
-        lastDay: '[ayer] h:mm A',
-        lastWeek: 'dddd h:mm A',
-        sameElse: 'DD/MM/YYYY h:mm A'
-    });
-    audioEntry.appendChild(date);
-
-    const publish = document.createElement('img');
-    publish.setAttribute('src', 'icons/cloud-upload.svg');
-    publish.setAttribute('class', 'publish-button');
-    audioEntry.appendChild(publish);
-
-    const remove = document.createElement('img');
-    remove.setAttribute('src', 'icons/delete.svg');
-    remove.setAttribute('class', 'remove-button');
-    audioEntry.appendChild(remove);
-
-    return audioEntry;
-}
-
 function addToLastRecordings(audioUrl, audioDate) {
     try {
-        const audioEntry = createAudioEntry(audioUrl, audioDate);
-        recentList.append(audioEntry);
+        const audioEntryDiv = new audioEntry(audioUrl, audioDate).getDiv();
+        recentList.append(audioEntryDiv);
     }
     catch (error) {
         console.error('Error updating last recordings:', error);
@@ -408,8 +373,8 @@ function addToLastRecordings(audioUrl, audioDate) {
 
 function addToCloudRecordings(audioUrl, audioDate) {
     try {
-        const audioEntry = createAudioEntry(audioUrl, audioDate);
-        Array.from(audioEntry.children).forEach(c => {
+        const audioEntryDiv = new audioEntry(audioUrl, audioDate).getDiv();
+        Array.from(audioEntryDiv.children).forEach(c => {
             if (c.classList.contains('publish-button')) {
                 c.parentNode.removeChild(c);
             }
@@ -418,70 +383,57 @@ function addToCloudRecordings(audioUrl, audioDate) {
         const download = document.createElement('img');
         download.setAttribute('src', 'icons/cloud-download.svg');
         download.setAttribute('class', 'download-button');
-        audioEntry.appendChild(download);
+        audioEntryDiv.appendChild(download);
 
-        cloudList.appendChild(audioEntry);
+        cloudList.appendChild(audioEntryDiv);
     }
     catch (error) {
         console.error('Error updating cloud recordings:', error);
     }
 }
 
-function playTargetedAudio(audioEntry, audioUrl) {
+function playTargetedAudio(audioEntryDiv, audioUrl) {
     // Remove the 'playing' class from all audio entries
     document.querySelectorAll('.audio-entry').forEach(entry => {
         entry.classList.remove('playing');
     });
-    audioEntry.classList.add('playing');
-    recordingImg.removeAttribute('class');
+    audioEntryDiv.classList.add('playing');
+    recordingImg.classList.remove("parpadea");
     enableAudioPlay(audioUrl);
 }
 
-function getAudioEntryAudioURL(audioEntry) {
-    return audioEntry.querySelector('[data-audio]').dataset.audio;
-}
-
-function getAudioEntryFilename(audioEntry) {
-    const url = getAudioEntryAudioURL(audioEntry);
-    return url.split('/').pop();
-}
-
-function getAudioEntryDate(audioEntry) {
-    return audioEntry.querySelector('.audio-date').textContent;
+function getAudioEntryDivAudioURL(audioEntryDiv) {
+    return audioEntryDiv.querySelector('[data-audio]').dataset.audio;
 }
 
 recentList.addEventListener('click', (e) => {
+    const audioEntryDiv = e.target.closest('.audio-entry');
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-date') || e.target.classList.contains('audio-entry')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        const audioUrl = getAudioEntryAudioURL(audioEntry);
+        const audioUrl = getAudioEntryDivAudioURL(audioEntryDiv);
         cloudActionsBtnInstance.setState(cloudActionState.Upload);
-        playTargetedAudio(audioEntry, audioUrl);
+        playTargetedAudio(audioEntryDiv, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        deleteRecording(audioEntry);
+        deleteRecording(audioEntryDiv);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
         //lo subirá al api/list y si no está en local lo publica
         upload();
     }
 });
 
 cloudList.addEventListener('click', (e) => {
+    const audioEntryDiv = e.target.closest('.audio-entry');
     if (e.target.tagName === 'IMG' && e.target.classList.contains('play-button') || e.target.classList.contains('audio-date')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        const audioUrl = e.target.dataset.audio;
+        const audioUrl = getAudioEntryDivAudioURL(audioEntryDiv);
         cloudActionsBtnInstance.setState(cloudActionState.Download);
-        playTargetedAudio(audioEntry, audioUrl);
+        playTargetedAudio(audioEntryDiv, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        deleteRecording(audioEntry);
+        deleteRecording(audioEntryDiv);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
-        const audioEntry = e.target.closest('.audio-entry');
-        donwloadAudioFromNode(audioEntry);
+        donwloadAudioFromNode(audioEntryDiv);
     }
 });
 
@@ -507,5 +459,3 @@ function disablePlayControls() {
         c.classList.add('disabled');
     });
 }
-
-
