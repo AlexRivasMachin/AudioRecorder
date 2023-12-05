@@ -28,12 +28,6 @@
 
       <div class="audioElements">
         <div class="audio-recorder">
-          <img
-            id="recorder-status"
-            class="animated-button red-animated-button rounded-button"
-            src="icons/microphone.svg"
-            alt="record button"
-          />
           <div id="recorded-time">
             <img id="recording-img" src="icons/recording.svg" width="25px" />
             <h2 id="timer">00:00:00</h2>
@@ -41,29 +35,12 @@
           <audio id="audio"></audio>
         </div>
 
-        <div id="status-buttons">
-          <img
-            id="imageBackToRecording"
-            src="icons/back-to-record.svg"
-            class="state-button green-animated-button rounded-button disabled"
-          />
-          <img
-            id="imageCloudActions"
-            src="icons/cloud-upload.svg"
-            alt="upload button"
-            class="state-button button-with-background green-animated-button rounded-button disabled"
-          />
-          <img
-            id="imageDeleteRecording"
-            src="icons/delete.svg"
-            class="state-button button-with-background green-animated-button rounded-button disabled"
-          />
-        </div>
+        <div id="status-buttons"></div>
       </div>
     </section>
     <script src="utils/moment/moment.js"></script>
     <script src="utils/moment/eu.js"></script>
     <script src="utils/snackbar/snackbar.min.js"></script>
-    <script src="js/script.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
   </body>
 </html>

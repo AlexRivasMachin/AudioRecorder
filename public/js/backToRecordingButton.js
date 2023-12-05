@@ -1,8 +1,8 @@
-export default class shareButton {
+export default class backToRecordingButton {
     constructor() {
         this.img = document.createElement('img');
-        this.img.id = "imageShareRecording";
-        this.img.src = "icons/share.svg";
+        this.img.id = "imageBackToRecording";
+        this.img.src = "icons/back-to-record.svg";
         this.img.classList.add('state-button', 'green-animated-button', 'rounded-button', 'disabled');
     }
 
@@ -16,10 +16,5 @@ export default class shareButton {
 
     enable() {
         this.img.classList.remove('disabled');
-    }
-
-    copyUrlToClipboard(audioUrl) {
-        navigator.clipboard.writeText(audioUrl);
-        Snackbar.show({ pos: 'bottom-center', text: 'Link del audio copiado al portapapeles', actionText: 'Ocultar' });
     }
 };
