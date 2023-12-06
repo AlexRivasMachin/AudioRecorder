@@ -44,30 +44,79 @@ document.getElementsByClassName('audio-recorder')[0].insertBefore(recorderBtnImg
 
 class App {
     constructor() {
+        this.stream = null;
         this.audio = undefined;
         this.blob = undefined;
         this.state = "recording";
     };
 
-    init() { };
+    init() {
+        this.getPermisosMicrofono(); 
+        this.initAudio();
+        this.initRecord(this.stream); //en el método cojemos el stream y no tenemos que pasarlo como parámetro
+    };
 
-    initAudio() { };
+    getPermisosMicrofono() {
+    navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          this.stream = stream;
+        })
+        .catch(function (error) {
+          console.error("Microphone not allowed error", error);
+        });
+}
 
-    loadBlob() { };
+    initAudio() {
+        onloadedmetadata = () => {console.log("metadata loaded")};
+        ondurationchange = () => {console.log("duration changed")};
+        ontimeupdate = () => {console.log("time updated")};
+        onended = () => {console.log("ended")};
+    };
 
-    initRecord() { };
+    initRecord(stream) {
+        mediaRecorder = new MediaRecorder(stream, {});
+        audioChunks = [];
 
-    record() { };
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+            }
+        };
 
-    stopRecording() { };
+        mediaRecorder.onstop = () => {
+            this.blob = new Blob(audioChunks, { type: 'audio/wav' });
+            this.loadBlob(this.blob);
+        };
+
+        this.record(mediaRecorder);
+    };
+
+    loadBlob(blob) {
+        this.audio = new Audio(URL.createObjectURL(blob));
+    };
+
+
+    record(mediaRecorder) {
+        mediaRecorder.start();
+    };
+
+    stopRecording() {
+       stopRecording();
+    };
 
     playAudio() { };
 
-    stopAudio() { };
+    stopAudio() {
 
-    upload() { };
+    };
 
-    deleteFile() { };
+    upload() {
+        upload();
+    };
+
+    deleteFile() {
+    };
 }
 
 
@@ -83,24 +132,13 @@ console.log(uuid);
 
 getRemoteAudioList();
 
+/*
 //Ejercicio 5 del pdf, no eliminar
 initAudio();
 function initAudio() {
-    audioPlayer = document.getElementById("audio");
-
-    audioPlayer.addEventListener("loadedmetadata", () => {
-        console.log("metadata lodaded");
-    });
-    audioPlayer.addEventListener("durationchange", () => {
-        console.log("duration changed");
-    });
-    audioPlayer.addEventListener("timeupdate", () => {
-        console.log("time updated");
-    });
-    audioPlayer.addEventListener("ended", () => {
-        console.log("ended");
-    });
+    getPermisosMicrofono();
 }
+*/
 
 //application state
 let state = {
@@ -307,7 +345,7 @@ function getRemoteAudioList() {
 }
 
 
-
+/*
 async function startRecording() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -335,7 +373,7 @@ async function startRecording() {
         }
     }
 }
-
+*/
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -460,20 +498,9 @@ function disablePlayControls() {
     });
 }
 
+
 document.addEventListener("DOMContentLoaded", function () {
-    // Verificar si el navegador es compatible con WebRTC
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      // Solicitar permisos para acceder al micrófono
-      navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then(function (stream) {
-          console.log("Permiso concedido para acceder al micrófono");
-          // Aquí puedes realizar acciones adicionales si el permiso es concedido
-        })
-        .catch(function (error) {
-          console.error("Error al obtener permisos de micrófono:", error);
-        });
-    } else {
-      console.error("Tu navegador no es compatible con WebRTC");
-    }
+    const app = new App();
+    app.init();
+    recorderBtnImg.click();
   });
