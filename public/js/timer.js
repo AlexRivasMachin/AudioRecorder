@@ -1,17 +1,17 @@
-class Timer{    
+class Timer {
     htmlElement;
     interval;
     startTime;
 
-    constructor(htmlElement){
+    constructor(htmlElement) {
         this.htmlElement = htmlElement;
     }
 
-    reloadTimer(){
+    reloadTimer() {
         this.setTextContent('00:00:00');
     }
 
-    setTextContent(text){
+    setTextContent(text) {
         this.htmlElement.textContent = text;
     }
 
@@ -21,17 +21,17 @@ class Timer{
         this.createInterval(false);
     }
 
-    continueTimer(audioPlayer){
+    continueTimer(audioPlayer) {
         this.createInterval(true, audioPlayer);
     }
 
-    createInterval(isContinue, audioPlayer){
+    createInterval(isContinue, audioPlayer) {
         this.interval = setInterval(() => {
             let currentTime;
             let elapsedTime;
-            if(isContinue){
+            if (isContinue) {
                 elapsedTime = Math.floor(audioPlayer.currentTime);
-            }else{
+            } else {
                 currentTime = new Date().getTime();
                 elapsedTime = Math.floor((currentTime - this.startTime) / 1000);
             }
@@ -43,10 +43,10 @@ class Timer{
             const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
             const formattedHours = hours < 10 ? `0${hours}` : hours;
             this.setTextContent(`${formattedHours}:${formattedMinutes}:${formattedSeconds}`);
-        }, 1000);
+        }, 10);
     }
 
-    stopTimer(){
+    stopTimer() {
         clearInterval(this.interval);
     }
 }
