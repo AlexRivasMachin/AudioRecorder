@@ -1,7 +1,7 @@
 export default class audioEntry {
     constructor(audioUrl, audioDate) {
         this.div = document.createElement('div');
-        this.audiURL = new URL(audioUrl);
+        this.audiURL = audioUrl;
         this.div.classList.add('audio-entry');
 
         const play = document.createElement('img');

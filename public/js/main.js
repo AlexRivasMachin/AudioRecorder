@@ -280,7 +280,7 @@ cloudActionsBtnImg.addEventListener('click', () => {
     if (existsAudioWithPlayingClass() && state == cloudActionState.Upload) {
         removeAudioWithPlayingClass();
     } else {
-        donwloadAudioFromNode(getAudiosWithPlayingClass()[0]);
+        donwloadAudioFromAudioEntryDiv(getAudiosWithPlayingClass()[0]);
         setState({ recording: true, paused: false, playing: false });
     }
 });
@@ -295,7 +295,7 @@ deleteRecordingBtnImg.addEventListener('click', () => {
 shareRecordingBtnImg.addEventListener('click', () => {
     if (existsAudioWithPlayingClass()) {
         const audioEntryDiv = getAudiosWithPlayingClass()[0];
-        const audioEntryHttpUrl = getAudioEntryDivAudioURL(audioEntryDiv).substring(5);
+        const audioEntryHttpUrl = getAudioEntryDivAudioURL(audioEntryDiv).toString().substring(5);
         shareRecordingBtnInstance.copyUrlToClipboard(audioEntryHttpUrl);
     }
 })
@@ -454,13 +454,13 @@ cloudList.addEventListener('click', (e) => {
         deleteRecording(audioEntryDiv);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
-        donwloadAudioFromNode(audioEntryDiv);
+        donwloadAudioFromAudioEntryDiv(audioEntryDiv);
     }
 });
 
-function donwloadAudioFromNode(audioEntryNode) {
-    const audioDate = audioEntryNode.querySelector('.audio-date').innerHTML;
-    const audioUrl = audioEntryNode.querySelector('.play-button').dataset.audio;
+function donwloadAudioFromAudioEntryDiv(audioEntryDiv) {
+    const audioDate = audioEntryDiv.querySelector('.audio-date').innerHTML;
+    const audioUrl = new URL(audioEntryDiv.querySelector('.play-button').dataset.audio);
     addToLastRecordings(audioUrl, audioDate)
 }
 
