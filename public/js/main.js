@@ -14,10 +14,9 @@ const recentList = document.getElementById('recent-list');
 const cloudList = document.getElementById('cloud-list');
 const statusButtons = document.getElementById('status-buttons');
 
-let audioPlayer;
-let mediaRecorder;
-let audioChunks = [];
 let uuid;
+
+let app;
 
 // cargar los botones de manera dinamica
 const recorderBtnInstance = new recorderBtn();
@@ -48,48 +47,51 @@ class App {
         this.audio = undefined;
         this.blob = undefined;
         this.state = "recording";
+        this.audioPlayer = document.getElementById("audio");
+        this.mediaRecorder = undefined;
+        this.audioChunks = [];
     };
 
     init() {
-        this.getPermisosMicrofono(); 
+        this.#getPermisosMicrofono();
         this.initAudio();
-        this.initRecord(this.stream); //en el método cojemos el stream y no tenemos que pasarlo como parámetro
+        //this.initRecord(this.stream); //en el método cojemos el stream y no tenemos que pasarlo como parámetro
     };
 
-    getPermisosMicrofono() {
-    navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then((stream) => {
-          this.stream = stream;
-        })
-        .catch(function (error) {
-          console.error("Microphone not allowed error", error);
-        });
-}
+    #getPermisosMicrofono() {
+        navigator.mediaDevices
+            .getUserMedia({ audio: true })
+            .then((stream) => {
+                this.stream = stream;
+            })
+            .catch(function (error) {
+                console.error("Microphone not allowed error", error);
+            });
+    }
 
     initAudio() {
-        onloadedmetadata = () => {console.log("metadata loaded")};
-        ondurationchange = () => {console.log("duration changed")};
-        ontimeupdate = () => {console.log("time updated")};
-        onended = () => {console.log("ended")};
+        onloadedmetadata = () => { console.log("metadata loaded") };
+        ondurationchange = () => { console.log("duration changed") };
+        ontimeupdate = () => { console.log("time updated") };
+        onended = () => { console.log("ended") };
     };
 
-    initRecord(stream) {
-        mediaRecorder = new MediaRecorder(stream, {});
-        audioChunks = [];
+    async initRecord(stream) {
+        this.mediaRecorder = new MediaRecorder(stream, {});
+        this.audioChunks = [];
 
-        mediaRecorder.ondataavailable = (event) => {
+        this.mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
-                audioChunks.push(event.data);
+                this.audioChunks.push(event.data);
             }
         };
 
-        mediaRecorder.onstop = () => {
-            this.blob = new Blob(audioChunks, { type: 'audio/wav' });
+        this.mediaRecorder.onstop = () => {
+            this.blob = new Blob(this.audioChunks, { type: 'audio/wav' });
             this.loadBlob(this.blob);
         };
 
-        this.record(mediaRecorder);
+        this.record();
     };
 
     loadBlob(blob) {
@@ -97,18 +99,45 @@ class App {
     };
 
 
-    record(mediaRecorder) {
-        mediaRecorder.start();
+    record() {
+        this.mediaRecorder.start();
     };
 
-    stopRecording() {
-       stopRecording();
+    async stopRecording() {
+        if (this.isRecording()) {
+            this.mediaRecorder.stop();
+            await sleep(30);
+            if (this.audioChunks.length > 0) {
+                this.#createAndSaveRecording();
+            }
+        }
     };
 
-    playAudio() { };
+    isRecording() {
+        return this.mediaRecorder && this.mediaRecorder.state === 'recording';
+    }
+
+    #createAndSaveRecording() {
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+        audioBlob.date = new Date().getTime();
+        addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.date);
+    }
+
+    setAudio(audioURL) {
+        setState({ playing: true, paused: false, stoped: false, recording: false });
+        this.audioPlayer.src = audioURL;
+    }
+
+    playAudio() {
+        this.audioPlayer.play();
+    };
+
+    pauseAudio() {
+        this.audioPlayer.pause();
+    };
 
     stopAudio() {
-
+        this.audioPlayer.stop();
     };
 
     upload() {
@@ -116,6 +145,10 @@ class App {
     };
 
     deleteFile() {
+    };
+
+    getAudioPlayer() {
+        return this.audioPlayer;
     };
 }
 
@@ -172,7 +205,7 @@ function setState(newState) {
             enablePlayControls();
             break;
         case paused:
-            timer.continueTimer(audioPlayer);
+            timer.continueTimer(app.getAudioPlayer());
             changeRecorderButtonAndRecordingImgAppearence('paused', 'pause', 'green', 'playing', 'parpadea');
             break;
     }
@@ -195,7 +228,9 @@ recorderBtnImg.addEventListener('click', async () => {
     switch (true) {
         case recording: {
             try {
-                await startRecording();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                await app.initRecord(stream);
+                //await startRecording();
                 recorderBtnInstance.unBlock();
                 setState({ recording: false, stoped: true });
             } catch {
@@ -206,33 +241,32 @@ recorderBtnImg.addEventListener('click', async () => {
         };
         case stoped: {
             setState({ stoped: false, recording: true });
-            await stopRecording();
+            await app.stopRecording();
             return;
         };
         case playing: {
             setState({ playing: false, paused: true });
-            audioPlayer.play();
+            app.playAudio();
             return;
         };
         case paused: {
             setState({ paused: false, playing: true });
-            audioPlayer.pause();
+            app.pauseAudio();
             return;
         };
     };
 });
 
 backToRecordingBtnImg.addEventListener('click', () => {
-    if (!isRecording()) {
+    if (!app.isRecording()) {
         setState({ recording: true, playing: false, paused: false });
         if (existsAudioWithPlayingClass()) {
             removeAudioWithPlayingClass();
         }
-
     }
     else {
         setState({ recording: false, playing: false, paused: false });
-        stopRecording();
+        app.stopRecording();
     }
 });
 
@@ -344,59 +378,8 @@ function getRemoteAudioList() {
         .catch(error => console.error(error));
 }
 
-
-/*
-async function startRecording() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPlayer.src = audioUrl;
-        };
-
-        mediaRecorder.start();
-    } catch (error) {
-        if (error.name === 'NotAllowedError') {
-            throw error;
-        } else {
-            console.error('Error accessing the microphone:', error);
-        }
-    }
-}
-*/
-
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function stopRecording() {
-    if (isRecording()) {
-        await mediaRecorder.stop();
-        await sleep(30);
-        if (audioChunks.length > 0) {
-            stopTimerRecord();
-        }
-    }
-}
-
-function isRecording() {
-    return mediaRecorder && mediaRecorder.state === 'recording';
-}
-
-function stopTimerRecord() {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-    audioBlob.date = new Date().getTime();
-    addToLastRecordings(URL.createObjectURL(audioBlob), audioBlob.date);
 }
 
 function addToLastRecordings(audioUrl, audioDate) {
@@ -437,11 +420,11 @@ function playTargetedAudio(audioEntryDiv, audioUrl) {
     });
     audioEntryDiv.classList.add('playing');
     recordingImg.classList.remove("parpadea");
-    enableAudioPlay(audioUrl);
+    app.setAudio(audioUrl);
 }
 
 function getAudioEntryDivAudioURL(audioEntryDiv) {
-    return audioEntryDiv.querySelector('[data-audio]').dataset.audio;
+    return new URL(audioEntryDiv.querySelector('[data-audio]').dataset.audio);
 }
 
 recentList.addEventListener('click', (e) => {
@@ -481,11 +464,6 @@ function donwloadAudioFromNode(audioEntryNode) {
     addToLastRecordings(audioUrl, audioDate)
 }
 
-function enableAudioPlay(audioUrl) {
-    setState({ playing: true, paused: false, stoped: false, recording: false });
-    audioPlayer.src = audioUrl;
-}
-
 function enablePlayControls() {
     Array.from(statusButtons.children).forEach(c => {
         c.classList.remove('disabled');
@@ -499,8 +477,7 @@ function disablePlayControls() {
 }
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    const app = new App();
+document.addEventListener("DOMContentLoaded", async () => {
+    app = new App();
     app.init();
-    recorderBtnImg.click();
-  });
+});
