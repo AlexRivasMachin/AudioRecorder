@@ -139,7 +139,24 @@ class App {
     };
 
     upload() {
-        upload();
+        setState({ uploading: true }); // estado actual: uploading
+        const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
+        body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
+        fetch("/api/upload/" + this.uuid, {
+            method: "POST", // usaremos el método POST para subir el audio
+            body,
+        })
+            .then((res) => res.json()) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
+            .then((json) => {
+                setState({
+                    files: json.files, // todos los ficheros del usuario
+                    uploading: false, // actualizar el estado actual
+                    uploaded: true, // actualizar estado actual
+                });
+            })
+            .catch((err) => {
+                this.setState({ error: true });
+            });
     };
 
     deleteFile() {
@@ -323,28 +340,6 @@ function publishRecording(audioEntryDiv) {
     setState({ recording: true, paused: false, playing: false, stoped: false });
 }
 
-//sube el audioEntry indicado al api/list y trás recibir la lista de audios los publica visualmente
-function upload() {
-    setState({ uploading: true }); // estado actual: uploading
-    const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
-    body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
-    fetch("/api/upload/" + this.uuid, {
-        method: "POST", // usaremos el método POST para subir el audio
-        body,
-    })
-        .then((res) => res.json()) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
-        .then((json) => {
-            setState({
-                files: json.files, // todos los ficheros del usuario
-                uploading: false, // actualizar el estado actual
-                uploaded: true, // actualizar estado actual
-            });
-        })
-        .catch((err) => {
-            this.setState({ error: true });
-        });
-}
-
 function actualizarServidorVisual(filesJson) {
     while (cloudList.firstChild) {
         cloudList.removeChild(cloudList.firstChild);
@@ -424,7 +419,7 @@ recentList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         //lo subirá al api/list y si no está en local lo publica
-        upload();
+        App.upload();
     }
 });
 
