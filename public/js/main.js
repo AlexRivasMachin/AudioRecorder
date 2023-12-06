@@ -15,7 +15,6 @@ const cloudList = document.getElementById('cloud-list');
 const statusButtons = document.getElementById('status-buttons');
 
 let uuid;
-
 let app;
 
 // cargar los botones de manera dinamica
@@ -55,7 +54,6 @@ class App {
     init() {
         this.#getPermisosMicrofono();
         this.initAudio();
-        //this.initRecord(this.stream); //en el método cojemos el stream y no tenemos que pasarlo como parámetro
     };
 
     #getPermisosMicrofono() {
@@ -165,14 +163,6 @@ console.log(uuid);
 
 getRemoteAudioList();
 
-/*
-//Ejercicio 5 del pdf, no eliminar
-initAudio();
-function initAudio() {
-    getPermisosMicrofono();
-}
-*/
-
 //application state
 let state = {
     recording: false,
@@ -190,14 +180,14 @@ function setState(newState) {
     switch (true) {
 
         case recording:
-            changeRecorderButtonAndRecordingImgAppearence('recording', 'microphone', 'red', 'recording', 'normal');
+            changeRecorderButtonAndRecordingImgAppearence('recording', 'stop', 'red', 'recording', 'parpadea');
+            timer.startTimer();
+            break;
+        case stoped:
+            changeRecorderButtonAndRecordingImgAppearence('stoped', 'microphone', 'red', 'recording', 'normal');
             disablePlayControls();
             timer.stopTimer();
             timer.reloadTimer();
-            break;
-        case stoped:
-            timer.startTimer();
-            changeRecorderButtonAndRecordingImgAppearence('stoped', 'stop', 'red', 'recording', "parpadea");
             break;
         case playing:
             timer.stopTimer();
@@ -227,21 +217,20 @@ recorderBtnImg.addEventListener('click', async () => {
     const { recording, stoped, paused, playing } = state;
     switch (true) {
         case recording: {
+            setState({ stoped: true, recording: false });
+            await app.stopRecording();
+            return;
+        };
+        case stoped: {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 await app.initRecord(stream);
-                //await startRecording();
                 recorderBtnInstance.unBlock();
-                setState({ recording: false, stoped: true });
+                setState({ recording: true, stoped: false });
             } catch {
                 recorderBtnInstance.block();
                 alert('Porfavor permite que podamos usar el microfono');
             }
-            return;
-        };
-        case stoped: {
-            setState({ stoped: false, recording: true });
-            await app.stopRecording();
             return;
         };
         case playing: {
@@ -259,14 +248,10 @@ recorderBtnImg.addEventListener('click', async () => {
 
 backToRecordingBtnImg.addEventListener('click', () => {
     if (!app.isRecording()) {
-        setState({ recording: true, playing: false, paused: false });
+        setState({ recording: false, stoped: true, playing: false, paused: false });
         if (existsAudioWithPlayingClass()) {
             removeAudioWithPlayingClass();
         }
-    }
-    else {
-        setState({ recording: false, playing: false, paused: false });
-        app.stopRecording();
     }
 });
 
@@ -281,7 +266,7 @@ cloudActionsBtnImg.addEventListener('click', () => {
         removeAudioWithPlayingClass();
     } else {
         donwloadAudioFromAudioEntryDiv(getAudiosWithPlayingClass()[0]);
-        setState({ recording: true, paused: false, playing: false });
+        setState({ recording: false, stoped: true, paused: false, playing: false });
     }
 });
 
@@ -317,7 +302,7 @@ function getAudiosWithPlayingClass() {
 function deleteRecording(audioEntryDiv) {
     recordingImg.classList.remove("parpadea");
     audioEntryDiv.parentNode.removeChild(audioEntryDiv);
-    setState({ recording: true, paused: false, playing: false });
+    setState({ recording: false, stoped: true, paused: false, playing: false });
 }
 
 //sube visualmente un audioEntry al servidor
