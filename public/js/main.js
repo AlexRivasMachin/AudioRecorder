@@ -459,3 +459,21 @@ function disablePlayControls() {
         c.classList.add('disabled');
     });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Verificar si el navegador es compatible con WebRTC
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Solicitar permisos para acceder al micrófono
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then(function (stream) {
+          console.log("Permiso concedido para acceder al micrófono");
+          // Aquí puedes realizar acciones adicionales si el permiso es concedido
+        })
+        .catch(function (error) {
+          console.error("Error al obtener permisos de micrófono:", error);
+        });
+    } else {
+      console.error("Tu navegador no es compatible con WebRTC");
+    }
+  });
