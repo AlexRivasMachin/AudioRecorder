@@ -1,6 +1,6 @@
 const express = require('express');
 const mongojs = require('mongojs');
-const db = mongojs('mongodb+srv://borja:r9aqBsP3I4Byyrib@cluster0.wnzdkvb.mongodb.net/', ['grabaciones']);
+const db = mongojs('app:r9aqBsP3I4Byyrib@cluster0.wnzdkvb.mongodb.net/grabaciones', ['grabaciones']);
 const app = express();
 const path = require('path');
 const port = 5000;
