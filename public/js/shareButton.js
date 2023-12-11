@@ -19,7 +19,9 @@ export default class shareButton {
     }
 
     copyUrlToClipboard(audioUrl) {
-        navigator.clipboard.writeText(audioUrl);
+        const audioID = audioUrl.split('/').pop();
+        const playURL = `${window.location.origin}/?play=${audioID}`;
+        navigator.clipboard.writeText(playURL);
         Snackbar.show({ pos: 'bottom-center', text: 'Link del audio copiado al portapapeles', actionText: 'Ocultar' });
     }
 };
