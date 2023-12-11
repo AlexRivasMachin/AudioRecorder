@@ -502,5 +502,3 @@ function disablePlayControls() {
         c.classList.add('disabled');
     });
 }
-
-
