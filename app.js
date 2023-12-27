@@ -73,10 +73,11 @@ app.get('/api/play/:id_', (req, res) => {
         }
         //si no lo encontramos, devolvemos un 404
          else if (!doc) {
-            res.status(404).send('No se encontró el fichero de audio');
+            res.json({redirectUrl : 'error404.html'});
         }
         //si lo encontramos, devolvemos el fichero de audio
         else {
+            console.log("enviando: " + doc);
             res.json(doc);
         }
     });

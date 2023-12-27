@@ -6,6 +6,7 @@ import recorderBtn from '../js/recorderButton.js'
 import cloudActionsBtn from './cloudActionsButton.js';
 import backToRecordingBtn from './backToRecordingButton.js';
 import audioEntry from './audioEntry.js';
+import cloudActionsButton from './cloudActionsButton.js';
 
 const timer = new Timer(document.getElementById('timer'));
 const recordedTimeDiv = document.getElementById('recorded-time');
@@ -13,6 +14,9 @@ const recordingImg = document.getElementById('recording-img');
 const recentList = document.getElementById('recent-list');
 const cloudList = document.getElementById('cloud-list');
 const statusButtons = document.getElementById('status-buttons');
+const divPrincipal = document.querySelector('.audio-area');
+const divAudios = document.querySelector('.audio-toolbar');
+const divAudioElements = document.querySelector('.audioElements');
 
 let uuid;
 let app;
@@ -33,6 +37,10 @@ const deleteRecordingBtnImg = deleteRecordingBtnInstance.getImg();
 const shareRecordingBtnInstance = new shareBtn();
 const shareRecordingBtnImg = shareRecordingBtnInstance.getImg();
 
+const playMode = new URLSearchParams(window.location.search).get("play");
+console.log(playMode);
+
+
 statusButtons.appendChild(backToRecordingBtnImg);
 statusButtons.appendChild(cloudActionsBtnImg);
 statusButtons.appendChild(deleteRecordingBtnImg);
@@ -45,7 +53,6 @@ class App {
         this.stream = null;
         this.audio = undefined;
         this.blob = undefined;
-        this.state = "recording";
         this.audioPlayer = document.getElementById("audio");
         this.mediaRecorder = undefined;
         this.audioChunks = [];
@@ -54,6 +61,7 @@ class App {
     init() {
         this.#getPermisosMicrofono();
         this.initAudio();
+        this.setPlayModeIfNeeded();
     };
 
     #getPermisosMicrofono() {
@@ -165,6 +173,33 @@ class App {
     getAudioPlayer() {
         return this.audioPlayer;
     };
+
+    setPlayModeIfNeeded(){
+        if(playMode != null){
+            this.setPlayMode();
+        }
+    }
+
+    async setPlayMode(){
+        divPrincipal.removeChild(divAudios);
+        divAudioElements.removeChild(statusButtons);
+
+        let audioUrl = await fetch(`/api/play/${playMode}`)
+            .then(response => response.json())
+            .then(json => {
+
+                if('redirectUrl' in json){
+                    window.location.href = json.redirectUrl;
+                }
+                console.log("recibido: " + JSON.stringify(json));
+                console.log("id: " + json._id);
+                this.setAudio(json._id);
+            });
+
+
+        this.setAudio(playMode);
+        console.log(state);
+    }
 }
 
 
@@ -176,7 +211,7 @@ if (!localStorage.getItem("uuid")) {
 }
 
 uuid = localStorage.getItem("uuid");
-console.log(uuid);
+console.log("user uuid: " + uuid);
 
 getRemoteAudioList();
 
