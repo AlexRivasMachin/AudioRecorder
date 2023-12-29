@@ -57,10 +57,7 @@ app.get('/api/list/:user_id', (req, res) => {
 
 
 app.post("/upload/:name", (req, res) => {
-
-    console.log("recibido upload");
     upload(req, res, async (err) => {
-        console.log("recibido upload");
         if (err) {
             res.send(err);
         } else {
@@ -141,7 +138,8 @@ app.listen(port, () => console.log(`Listening on port ${port}!`));
 /**FUNCIONES (TO-IMPROVE)**/
 function handleList(req, res) {
     //en mongo date-1 es para ponerlo en orden descendente para que pille los 5 últimos :)
-    db.grabaciones.find({}).sort({date: -1}).limit(5).exec((err, docs) => {
+    
+    db.grabaciones.find({}).sort({date: -1}).limit(5 ,(err, docs) => {
         if (err) {
             res.send(err);
         } else {
@@ -155,7 +153,7 @@ const upload = multer({
         fileSize: 2500000
     },
     fileFilter: function(req, file, cb) {
-        if (file.mimetype !== 'audio/ogg') {
+        if (file.mimetype !== 'audio/wav') {
             return cb(new Error('Solo se permiten archivos de audio en formato ogg'));
         }
         cb(null, true);
