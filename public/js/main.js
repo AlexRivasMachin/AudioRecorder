@@ -17,6 +17,7 @@ const statusButtons = document.getElementById('status-buttons');
 const divPrincipal = document.querySelector('.audio-area');
 const divAudios = document.querySelector('.audio-toolbar');
 const divAudioElements = document.querySelector('.audioElements');
+const url = window.location.href;
 
 let uuid;
 let app;
@@ -150,9 +151,11 @@ class App {
         setState({ uploading: true }); // estado actual: uploading
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
         body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
-        fetch("/api/upload/" + uuid, {
+        fetch(`${url}upload/${uuid}`, {
             method: "POST", // usaremos el método POST para subir el audio
-            body,
+            headers: {
+            },
+            body: body
         })
             .then((res) => res.json()) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
             .then((json) => {

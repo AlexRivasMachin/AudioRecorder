@@ -55,21 +55,12 @@ app.get('/api/list/:user_id', (req, res) => {
     res.sendFile(path.join(__dirname, 'api/list/index.html'));
 });
 
-/*
-app.post('/upload/:name', (req, res) => {
-    const audio = req.body;
-    db.grabaciones.insert(audio, (err, doc) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(doc);
-        }
-    });
-});
-*/
 
-app.post("/upload/:name", (req, res, next) => {
+app.post("/upload/:name", (req, res) => {
+
+    console.log("recibido upload");
     upload(req, res, async (err) => {
+        console.log("recibido upload");
         if (err) {
             res.send(err);
         } else {
