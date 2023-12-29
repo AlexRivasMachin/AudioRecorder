@@ -51,13 +51,36 @@ app.get('/api/list/:user_id', (req, res) => {
     res.sendFile(path.join(__dirname, 'api/list/index.html'));
 });
 
-app.post('uploadAudio', (req, res) => {
+app.post('/upload/:name', (req, res) => {
     const audio = req.body;
     db.grabaciones.insert(audio, (err, doc) => {
         if (err) {
             res.send(err);
         } else {
             res.json(doc);
+        }
+    });
+});
+
+app.post("/upload/:name", (req, res, next) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            res.send(err);
+        } else {
+            const audio = {
+                name: req.params.name,
+                filename: req.file.filename, 
+                date: Date.now(),
+                accessed: 0 // Inicializa 'accessed' en 0
+            };
+
+            db.grabaciones.insert(audio, (err, doc) => {
+                if (err) {
+                    res.send(err);
+                } else {
+                    handleList(req, res); 
+                }
+            });
         }
     });
 });
