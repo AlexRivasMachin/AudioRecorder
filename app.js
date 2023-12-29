@@ -39,6 +39,8 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/list', handleList);
+
 app.get('/api/list/:user_id', (req, res) => {
     const user_id = req.params.user_id;
     db.users.findOne({ _id: mongojs.ObjectId(user_id) }, (err, doc) => {
@@ -71,7 +73,7 @@ app.post("/upload/:name", (req, res, next) => {
                 name: req.params.name,
                 filename: req.file.filename, 
                 date: Date.now(),
-                accessed: 0 // Inicializa 'accessed' en 0
+                accessed: 0 
             };
 
             db.grabaciones.insert(audio, (err, doc) => {
@@ -84,6 +86,7 @@ app.post("/upload/:name", (req, res, next) => {
         }
     });
 });
+
 
 app.get('/api/play/:filename', (req, res) => {
     //pillamos el id del audio
@@ -105,4 +108,16 @@ app.get('/api/play/:filename', (req, res) => {
         }
     });
 });
+
 app.listen(port, () => console.log(`Listening on port ${port}!`));
+
+function handleList(req, res) {
+    //en mongo date-1 es para ponerlo en orden descendente para que pille los 5 últimos :)
+    db.grabaciones.find({}).sort({date: -1}).limit(5).exec((err, docs) => {
+        if (err) {
+            res.send(err);
+        } else {
+            res.json(docs);
+        }
+    });
+}
