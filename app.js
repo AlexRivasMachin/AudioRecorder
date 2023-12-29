@@ -3,7 +3,8 @@ const mongojs = require('mongojs');
 const db = mongojs('mongodb://localhost:27017/grabaciones', ['grabaciones']);
 const app = express();
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs'); //npm install fs
+const multer = require('multer'); //npm install multer
 const port = 5000;
 
 //para meterlos en mongo aunque sea solo una vez
