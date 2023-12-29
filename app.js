@@ -43,16 +43,12 @@ app.get('/', (req, res) => {
 
 app.get('/list', handleList);
 
-app.get('/api/list/:user_id', (req, res) => {
-    const user_id = req.params.user_id;
-    db.users.findOne({ _id: mongojs.ObjectId(user_id) }, (err, doc) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(doc);
-        }
-    });
-    res.sendFile(path.join(__dirname, 'api/list/index.html'));
+app.get('/api/list/:name', async (req, res) => {
+    const id = req.params.name;
+
+    await handleList(id)
+        .then((files) => res.json(files))
+        .catch((err) => res.sendStatus(500));
 });
 
 /*
@@ -147,15 +143,31 @@ app.get('/api/delete/:filename', async (req, res,next) => {
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
 
-/**FUNCIONES (TO-IMPROVE)**/
-function handleList(req, res) {
+/**
+ * Desde la base de datos obtener los últimos 5 audios del presente usuario (id),
+ * las grabaciones ordenadas por fecha(primero las más actuales)
+ * crea el objeto json solicitado
+ * o [] si el usuario no tiene grabaciones asociadas y devuelve
+ */
+async function handleList(id) {
     //en mongo date-1 es para ponerlo en orden descendente para que pille los 5 últimos :)
-    db.grabaciones.find({}).sort({date: -1}).limit(5).exec((err, docs) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(docs);
-        }
+    // TODO actualizar el accessed
+    return new Promise((resolve, reject) => {
+        let files = { files: [] };
+        db.grabaciones.find({ _id: mongojs.ObjectId(id) }).sort({ date: -1 }).limit(5, (err, docs) => {
+            if (err) {
+                reject(err);
+            } else {
+                docs.forEach(doc => {
+                    const fileToAdd = {
+                        filename: doc.filename,
+                        date: doc.date
+                    };
+                    files.files.push(fileToAdd);
+                });
+                resolve(files);
+            }
+        });
     });
 }
 
