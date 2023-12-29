@@ -1,2 +1,12 @@
 # npm
 node_modules
+package-lock.json
+
+# JetBrains
+.idea
+
+#VSCode
+.vscode
+
+#Docker data
+data
