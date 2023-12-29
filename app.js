@@ -1,11 +1,12 @@
 const express = require('express');
 const mongojs = require('mongojs');
 const db = mongojs('mongodb://localhost:27017/grabaciones', ['grabaciones']);
+const { ObjectId } = require('mongodb');  // Importa ObjectId directamente de mongodb
 const app = express();
 const path = require('path');
 const fs = require('fs'); //npm install fs
 const multer = require('multer'); //npm install multer
-const port = 5000;
+const port = 5001;
 
 //para meterlos en mongo aunque sea solo una vez
 const audioFiles = [
@@ -57,22 +58,24 @@ app.get('/api/list/:name', async (req, res) => {
 
 
 app.post("/upload/:name", (req, res) => {
+    const userId = req.params.name;
     upload(req, res, async (err) => {
         if (err) {
             res.send(err);
         } else {
             const audio = {
-                name: req.params.name,
-                filename: req.file.filename, 
+                userId: userId,
                 date: Date.now(),
                 accessed: 0 
             };
 
-            db.grabaciones.insert(audio, (err, doc) => {
+            db.grabaciones.insert(audio, async (err, doc) => {
                 if (err) {
                     res.send(err);
                 } else {
-                    handleList(req, res); 
+                        await handleList(userId)
+                            .then((files) => res.json(files))
+                            .catch((err) => res.sendStatus(500));
                 }
             });
         }
@@ -124,7 +127,7 @@ app.get('/api/delete/:filename', async (req, res,next) => {
                         if (err) {
                             console.error(`Error al eliminar el archivo: ${err}`);
                         } else {
-                            handleList(req, res);
+                            handleList();
                         }
                     });
                 }
@@ -141,12 +144,12 @@ app.listen(port, () => console.log(`Listening on port ${port}!`));
  * crea el objeto json solicitado
  * o [] si el usuario no tiene grabaciones asociadas y devuelve
  */
-async function handleList(id) {
+async function handleList(userId) {
     //en mongo date-1 es para ponerlo en orden descendente para que pille los 5 últimos :)
     // TODO actualizar el accessed
     return new Promise((resolve, reject) => {
         let files = { files: [] };
-        db.grabaciones.find({ _id: mongojs.ObjectId(id) }).sort({ date: -1 }).limit(5, (err, docs) => {
+        db.grabaciones.find({ userId: userId} ).sort({ date: -1 }).limit(5, (err, docs) => {
             if (err) {
                 reject(err);
             } else {
