@@ -150,7 +150,7 @@ class App {
         setState({ uploading: true }); // estado actual: uploading
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
         body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
-        fetch("/api/upload/" + this.uuid, {
+        fetch("/api/upload/" + uuid, {
             method: "POST", // usaremos el método POST para subir el audio
             body,
         })
@@ -163,7 +163,7 @@ class App {
                 });
             })
             .catch((err) => {
-                this.setState({ error: true });
+                console.log("Error subiendo el archivo");
             });
     };
 
@@ -454,7 +454,7 @@ recentList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         //lo subirá al api/list y si no está en local lo publica
-        App.upload();
+        app.upload();
     }
 });
 
