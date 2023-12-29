@@ -10,6 +10,7 @@ const multer = require('multer');
 const port = 5000;
 const passport = require('passport');
 const session = require('express-session');
+const bodyParser = require('body-parser');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const GITHUB_CLIENT_ID = "b37866e442e64773319d";
@@ -51,22 +52,37 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
 }));
-
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser(function (user, done) {
-    done(null, user._id);
-});
-
-passport.deserializeUser(function (id, done) {
-    db.users.findOne({ $or: [{ githubId: id }, { googleId: id }] }, function (err, user) {
-        done(err, user);
+passport.serializeUser(function (user, cb) {
+    process.nextTick(function () {
+        cb(null, { _id: user._id, githubId: user.githubId, googleId: user.googleId });
     });
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/login.html'));
+passport.deserializeUser(function (user, cb) {
+    process.nextTick(function () {
+        return cb(null, user);
+    });
+});
+
+/**
+ * This middlewhere checks if the user is authenticated
+ * if it is, it will call the next middleware
+ * use it in any route you want to protect
+*/
+function ensureAuthenticated(req, res, next) {
+    if (req.user) {
+        return next();
+    } else {
+        res.redirect('/login');
+    }
+}
+
+app.get('/', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 app.get('/login', (req, res) => {
@@ -75,8 +91,15 @@ app.get('/login', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/recorder', (req, res) => {
+app.get('/recorder', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+app.get('/logout', (req, res) => {
+    req.logout(function (err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
 });
 
 app.get('/list', handleList);
@@ -278,17 +301,19 @@ app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile'] }));
 
 app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    function (req, res) {
-        res.redirect('/recorder');
-    });
+    passport.authenticate('google', {
+        failureRedirect: '/login',
+        successReturnToOrRedirect: '/recorder'
+    }),
+);
 
 // Routes for GitHub OAuth
 app.get('/auth/github',
     passport.authenticate('github'));
 
 app.get('/auth/github/callback',
-    passport.authenticate('github', { failureRedirect: '/login' }),
-    function (req, res) {
-        res.redirect('/recorder');
-    });
+    passport.authenticate('github', {
+        failureRedirect: '/login',
+        successReturnToOrRedirect: '/recorder'
+    }),
+);

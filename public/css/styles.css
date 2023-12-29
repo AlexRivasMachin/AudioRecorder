@@ -389,3 +389,42 @@ input[type="checkbox"] {
     margin-left: 5px;
   }
 }
+
+#audio-header {
+  display: inline-flex;
+  align-items: center;
+}
+
+#audio-header a {
+  text-decoration: none;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 10px;
+  margin-left: auto;
+  margin-right: 10px;
+  height: 10px;
+  gap: 10px;
+  background-color: #ff3856;
+  outline: 3px #ff3856 solid;
+  outline-offset: -3px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: 400ms;
+}
+
+#audio-header span {
+  font-weight: 700;
+  font-size: 16px;
+  transition: 400ms;
+}
+
+#audio-hover svg path {
+  transition: 400ms;
+}
+
+#audio-header a:hover {
+  background-color: transparent;
+}
