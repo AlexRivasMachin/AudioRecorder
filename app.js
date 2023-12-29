@@ -62,12 +62,12 @@ app.post('uploadAudio', (req, res) => {
     });
 });
 
-app.get('/api/play/:id_', (req, res) => {
+app.get('/api/play/:filename', (req, res) => {
     //pillamos el id del audio
-    const id_ = req.params.id_;
+    const id_ = req.params.filename;
 
     //buscamos el audio en la base de datos
-    db.grabaciones.findOne({ filename: id_ }, (err, doc) => {
+    db.grabaciones.findOne({ filename: filename }, (err, doc) => {
         if (err) {
             res.send(err);
         }
