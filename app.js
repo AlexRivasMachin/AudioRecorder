@@ -90,9 +90,13 @@ app.get('/logout', (req, res) => {
     });
 });
 
+app.get('/session', ensureAuthenticated, (req, res) => {
+    res.json(req.user._id);
+});
+
 app.get('/list', handleList);
 
-app.get('/recorder/api/list/:name', async (req, res) => {
+app.get('/api/list/:name', async (req, res) => {
     const id = req.params.name;
 
     await handleList(id)
@@ -104,6 +108,9 @@ app.get('/recorder/api/list/:name', async (req, res) => {
 // Configuración de almacenamiento personalizada
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        if (!fs.existsSync(path.join(__dirname, 'multerTemp'))) {
+            fs.mkdirSync(path.join(__dirname, 'multerTemp'));
+        }
         // Especifica el directorio de destino
         cb(null, path.join(__dirname, 'multerTemp'));
     },
@@ -128,11 +135,15 @@ const upload = multer({
 }).single("recording");
 
 
-app.post("/recorder/upload/:name", (req, res) => {
+app.post("/upload/:name", (req, res) => {
+    if (!req.user) {
+        res.sendStatus(403);
+        return;
+    }
     upload(req, res, async (err) => {
         if (err) {
             res.send(err);
-        }else {
+        } else {
             const userId = req.params.name;
             const audio = {
                 userId: userId,
@@ -144,6 +155,9 @@ app.post("/recorder/upload/:name", (req, res) => {
                 if (err) {
                     res.send(err);
                 } else {
+                    if (!fs.existsSync(path.join(__dirname, 'recordings'))) {
+                        fs.mkdirSync(path.join(__dirname, 'recordings'));
+                    }
                     const destinationPath = path.join(__dirname, 'recordings', audio.filename);
 
                     // Mueve el archivo de la carpeta temporal a la carpeta recordings
@@ -164,7 +178,7 @@ app.post("/recorder/upload/:name", (req, res) => {
 });
 
 app.use('/recordings', express.static(path.join(__dirname, 'recordings')));
-app.get('/recorder/getRecordingUrl/:nombreArchivo', (req, res) => {
+app.get('/getRecordingUrl/:nombreArchivo', (req, res) => {
     const nombreArchivoDecodificado = decodeURIComponent(req.params.nombreArchivo);
 
     const urlArchivo = `${req.protocol}://${req.get('host')}/recordings/${nombreArchivoDecodificado}`;

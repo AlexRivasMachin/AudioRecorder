@@ -1,4 +1,3 @@
-import uuidv4 from '../utils/uuid/v4.js';
 import Timer from './timer.js';
 import shareBtn from '../js/shareButton.js';
 import deleteBtn from '../js/deleteButton.js';
@@ -17,9 +16,9 @@ const statusButtons = document.getElementById('status-buttons');
 const divPrincipal = document.querySelector('.audio-area');
 const divAudios = document.querySelector('.audio-toolbar');
 const divAudioElements = document.querySelector('.audioElements');
-const url = window.location.href;
+const url = window.location.origin;
 
-let uuid;
+let user_id;
 let app;
 
 // cargar los botones de manera dinamica
@@ -150,8 +149,8 @@ class App {
     upload() {
         const fileNum = cloudList.childElementCount;
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
-        body.append("recording", this.blob, `${uuid}:Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
-        fetch(`${url}/upload/${uuid}`, {
+        body.append("recording", this.blob, `${user_id}:Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
+        fetch(`${url}/upload/${user_id}`, {
             method: "POST", // usaremos el método POST para subir el audio
             headers: {},
             body: body
@@ -172,13 +171,13 @@ class App {
         return this.audioPlayer;
     };
 
-    setPlayModeIfNeeded(){
-        if(playMode != null){
+    setPlayModeIfNeeded() {
+        if (playMode != null) {
             this.setPlayMode();
         }
     }
 
-    async setPlayMode(){
+    async setPlayMode() {
         divPrincipal.removeChild(divAudios);
         divAudioElements.removeChild(statusButtons);
 
@@ -186,7 +185,7 @@ class App {
             .then(response => response.json())
             .then(json => {
 
-                if('redirectUrl' in json){
+                if ('redirectUrl' in json) {
                     window.location.href = json.redirectUrl;
                 }
                 console.log("recibido: " + JSON.stringify(json));
@@ -200,16 +199,14 @@ class App {
     }
 }
 
-
-//generar uuid
-if (!localStorage.getItem("uuid")) {
-
-    localStorage.setItem("uuid", uuidv4());
-
+//obtener id de usuario
+async function getUserId() {
+    const response = await fetch(`${url}/session`);
+    const data = await response.json();
+    user_id = data;
+    console.log("user id", user_id);
+    return user_id;
 }
-
-uuid = localStorage.getItem("uuid");
-console.log("user uuid: " + uuid);
 
 getRemoteAudioList();
 
@@ -390,13 +387,17 @@ function actualizarServidorVisual(filesJson) {
     });
 }
 
-function getRemoteAudioList() {
-    fetch(`${url}/api/list/${uuid}`)
-        .then(response => response.json())
-        .then(data => {
-            actualizarServidorVisual(data.files);
-        })
-        .catch(error => console.error(error));
+async function getRemoteAudioList() {
+    if (user_id == undefined || user_id == null) {
+        user_id = await getUserId();
+    }
+    try {
+        const response = await fetch(`${url}/api/list/${user_id}`);
+        const data = await response.json();
+        actualizarServidorVisual(data.files);
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 function sleep(ms) {

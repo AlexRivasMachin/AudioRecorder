@@ -10,3 +10,7 @@ package-lock.json
 
 #Docker data
 data
+
+#Audio files
+multerTemp
+recordings
