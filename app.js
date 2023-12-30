@@ -67,6 +67,18 @@ function ensureAuthenticated(req, res, next) {
     }
 }
 
+/**
+ * Se asegura que en los enpoint delete y upload el usuario este autenticado
+ * si lo esta, devuelve el estado 403
+ */
+function ensureAuthenticatedEnpoint(req, res, next) {
+    if (req.user) {
+        return next();
+    } else {
+        res.sendStatus(403);
+    }
+}
+
 app.get('/', ensureAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public/index.html'));
 });
@@ -135,11 +147,7 @@ const upload = multer({
 }).single("recording");
 
 
-app.post("/upload/:name", (req, res) => {
-    if (!req.user) {
-        res.sendStatus(403);
-        return;
-    }
+app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
             res.send(err);
@@ -207,7 +215,7 @@ app.get('/api/play/:filename', (req, res) => {
     });
 });
 
-app.get('/api/delete/:filename', async (req, res,next) => {
+app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,next) => {
     // Esta función borrara :filename de la carpeta recordings TO-DO
     // además, lo borrará también de la base de datos. Erabiltzailearen :check
     // Devolverá como respuesta las últimas 5 grabaciones del usuario :check
