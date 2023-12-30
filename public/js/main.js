@@ -148,7 +148,6 @@ class App {
     };
 
     upload() {
-        setState({ uploading: true }); // estado actual: uploading
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
         body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
         body.append("filename", "nombreFichero");
@@ -160,11 +159,7 @@ class App {
         })
             .then((res) => res.json()) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
             .then((json) => {
-                setState({
-                    files: json.files, // todos los ficheros del usuario
-                    uploading: false, // actualizar el estado actual
-                    uploaded: true, // actualizar estado actual
-                });
+                getRemoteAudioList();
             })
             .catch((err) => {
                 console.log("Error subiendo el archivo");
@@ -389,7 +384,7 @@ function actualizarServidorVisual(filesJson) {
 }
 
 function getRemoteAudioList() {
-    fetch('/api/list')
+    fetch(`${url}/api/list/${uuid}`)
         .then(response => response.json())
         .then(data => {
             actualizarServidorVisual(data.files);

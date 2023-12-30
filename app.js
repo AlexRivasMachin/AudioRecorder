@@ -90,7 +90,7 @@ app.get('/logout', (req, res) => {
 
 app.get('/list', handleList);
 
-app.get('/api/list/:name', async (req, res) => {
+app.get('/recorder/api/list/:name', async (req, res) => {
     const id = req.params.name;
 
     await handleList(id)
@@ -217,7 +217,7 @@ const upload = multer({
     },
     fileFilter: function(req, file, cb) {
         if (file.mimetype !== 'audio/wav') {
-            return cb(new Error('Solo se permiten archivos de audio en formato ogg'));
+            return cb(new Error('Solo se permiten archivos de audio en formato wav'));
         }
         cb(null, true);
     }
