@@ -99,26 +99,62 @@ app.get('/recorder/api/list/:name', async (req, res) => {
 });
 
 
+// Configuración de almacenamiento personalizada
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // Especifica el directorio de destino
+        cb(null, path.join(__dirname, 'multerTemp'));
+    },
+    filename: function (req, file, cb) {
+        // Especifica el nombre del archivo
+        cb(null, file.originalname);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 2500000
+    },
+    fileFilter: function(req, file, cb) {
+        if (file.mimetype !== 'audio/wav') {
+            return cb(new Error('Solo se permiten archivos de audio en formato wav'));
+        }
+        cb(null, true);
+    }
+//single para que siempre maneje un solo archivo
+}).single("recording");
+
+
 app.post("/recorder/upload/:name", (req, res) => {
-    const userId = req.params.name;
     upload(req, res, async (err) => {
         if (err) {
             res.send(err);
-        } else {
+        }else {
+            const userId = req.params.name;
             const audio = {
                 userId: userId,
-                filename: req.file.filename,
+                filename: req.file.originalname,
                 date: Date.now(),
-                accessed: 0 
+                accessed: 0
             };
-
             db.grabaciones.insert(audio, async (err, doc) => {
                 if (err) {
                     res.send(err);
                 } else {
-                        await handleList(userId)
-                            .then((files) => res.json(files))
-                            .catch((err) => res.sendStatus(500));
+                    const destinationPath = path.join(__dirname, 'recordings', audio.filename);
+
+                    // Mueve el archivo de la carpeta temporal a la carpeta recordings
+                    fs.rename(req.file.path, destinationPath, (err) => {
+                        if (err) {
+                            console.log(err);
+                            res.sendStatus(500);
+                        }
+                    });
+
+                    await handleList(userId)
+                        .then((files) => res.json(files))
+                        .catch((err) => res.sendStatus(500));
                 }
             });
         }
@@ -211,18 +247,6 @@ async function handleList(userId) {
     });
 }
 
-const upload = multer({
-    limits: {
-        fileSize: 2500000
-    },
-    fileFilter: function(req, file, cb) {
-        if (file.mimetype !== 'audio/wav') {
-            return cb(new Error('Solo se permiten archivos de audio en formato wav'));
-        }
-        cb(null, true);
-    }
-//single para que siempre maneje un solo archivo
-}).single("recording");
 
 
 module.exports = app;
