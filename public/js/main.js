@@ -151,7 +151,8 @@ class App {
         setState({ uploading: true }); // estado actual: uploading
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
         body.append("recording", this.blob); // en el atributo recording de formData guarda el audio para su posterior subida
-        fetch(`${url}upload/${uuid}`, {
+        body.append("filename", "nombreFichero");
+        fetch(`${url}/upload/${uuid}`, {
             method: "POST", // usaremos el método POST para subir el audio
             headers: {
             },

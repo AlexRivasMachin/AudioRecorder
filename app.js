@@ -6,7 +6,6 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const port = 5000;
 const passport = require('passport');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -100,7 +99,7 @@ app.get('/api/list/:name', async (req, res) => {
 });
 
 
-app.post("/upload/:name", (req, res) => {
+app.post("/recorder/upload/:name", (req, res) => {
     const userId = req.params.name;
     upload(req, res, async (err) => {
         if (err) {
@@ -108,6 +107,7 @@ app.post("/upload/:name", (req, res) => {
         } else {
             const audio = {
                 userId: userId,
+                filename: req.file.filename,
                 date: Date.now(),
                 accessed: 0 
             };
@@ -178,6 +178,8 @@ app.get('/api/delete/:filename', async (req, res,next) => {
         }
     });
 });
+
+
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
 
