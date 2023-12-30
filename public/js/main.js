@@ -181,18 +181,13 @@ class App {
         divPrincipal.removeChild(divAudios);
         divAudioElements.removeChild(statusButtons);
 
-        let audioUrl = await fetch(`/api/play/${playMode}`)
-            .then(response => response.json())
-            .then(json => {
-
-                if ('redirectUrl' in json) {
-                    window.location.href = json.redirectUrl;
-                }
-                console.log("recibido: " + JSON.stringify(json));
-                console.log("id: " + json._id);
-                this.setAudio(json._id);
-            });
-
+        try{
+            const response = await fetch(`/api/play/${playMode}`);
+            const data = await response.json();
+            this.setAudio(data._id);
+        }catch (error) {
+            window.location.replace(`${url}/error404`);
+        }
 
         this.setAudio(playMode);
         console.log(state);
@@ -201,14 +196,19 @@ class App {
 
 //obtener id de usuario
 async function getUserId() {
-    const response = await fetch(`${url}/session`);
-    const data = await response.json();
-    user_id = data;
-    console.log("user id", user_id);
-    return user_id;
+    try{
+        const response = await fetch(`${url}/session`);
+        const data = await response.json();
+        user_id = data;
+        console.log("user id", user_id);
+        getRemoteAudioList();
+        return user_id;
+    }catch (error) {
+        // Esta reproduciendo un audio de otro usuario
+    }
 }
 
-getRemoteAudioList();
+getUserId();
 
 //application state
 let state = {

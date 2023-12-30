@@ -60,6 +60,10 @@ app.use(cors());
  * use it in any route you want to protect
 */
 function ensureAuthenticated(req, res, next) {
+    // Si el usuario quiere reproducir un audio anonimo, no es necesario que este autenticado
+    if(req.query.play){
+        return next();
+    }
     if (req.user) {
         return next();
     } else {
@@ -84,7 +88,7 @@ app.get('/', ensureAuthenticated, (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/login.html'));
+    res.sendFile(path.join(__dirname, 'public/login.html'));
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -203,16 +207,19 @@ app.get('/api/play/:filename', (req, res) => {
         if (err) {
             res.send(err);
         }
-        //si no lo encontramos, devolvemos un 404
-         else if (!doc) {
-            res.json({redirectUrl : 'error404.html'});
+        else if (!doc) {
+            res.status(404);
         }
-        //si lo encontramos, devolvemos el fichero de audio
+        // if found, send the audio file
         else {
             console.log("enviando: " + doc);
             res.json(doc);
         }
     });
+});
+
+app.get('/error404', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/error404.html'));
 });
 
 app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,next) => {
