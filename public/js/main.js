@@ -378,7 +378,15 @@ function actualizarServidorVisual(filesJson) {
         cloudList.removeChild(cloudList.firstChild);
     }
     filesJson.forEach(audio => {
-        addToCloudRecordings('blob:http://localhost:5000/' + audio.filename, audio.date);
+        fetch(`${url}/getRecordingUrl/${encodeURIComponent(audio.filename)}`)
+            .then(response => response.json())
+            .then(data => {
+                const urlArchivo = data.url;
+                addToCloudRecordings(urlArchivo, audio.date);
+            })
+            .catch(error => {
+                console.error('Error al obtener la URL del archivo:', error);
+            });
     });
 }
 

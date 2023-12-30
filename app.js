@@ -9,6 +9,7 @@ const multer = require('multer');
 const passport = require('passport');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const port = 5000;
 
 const authRouter = require('./routes/auth');
@@ -51,6 +52,7 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors());
 
 /**
  * This middlewhere checks if the user is authenticated
@@ -161,6 +163,14 @@ app.post("/recorder/upload/:name", (req, res) => {
     });
 });
 
+app.use('/recordings', express.static(path.join(__dirname, 'recordings')));
+app.get('/recorder/getRecordingUrl/:nombreArchivo', (req, res) => {
+    const nombreArchivoDecodificado = decodeURIComponent(req.params.nombreArchivo);
+
+    const urlArchivo = `${req.protocol}://${req.get('host')}/recordings/${nombreArchivoDecodificado}`;
+
+    res.json({ url: urlArchivo });
+});
 
 app.get('/api/play/:filename', (req, res) => {
     //pillamos el id del audio
