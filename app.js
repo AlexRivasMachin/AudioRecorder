@@ -177,6 +177,30 @@ app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
                     return; // Cancel the insert if there's an error
                 }
             });
+            /*
+            const audioSinElNombreDelFinal = audio.filename.split('_')[0];
+            console.log(audioSinElNombreDelFinal);
+            // busca un audio que comienza con audioSinElNombreDelFinal
+            db.grabaciones.findOne({ filename: new RegExp('^' + audioSinElNombreDelFinal) }, (err, doc) => {
+                if (err) {
+                    console.error(err);
+                } else if (doc) {
+                    console.log('Ya existe un audio que comienza con ' + audioSinElNombreDelFinal);
+                } else {
+                    // si no se encontró ningún audio, inserta el nuevo audio
+                    db.grabaciones.insert(audio, async (err, doc) => {
+                        if (err) {
+                         res.status(409).send('El audio ya esta en la nube').end();
+                        } else {
+                            console.log('Audio insertado:', doc);
+                        }
+                        await handleList(userId)
+                            .then((files) => res.json(files))
+                            .catch((err) => res.status(500).send('Algo a ido mal, vuelve a probar más tarde handle list'));
+                        });
+                }
+            });
+            */
             db.grabaciones.insert(audio, async (err, doc) => {
                 if (err) {
                     res.status(409).send('El audio ya esta en la nube').end();
