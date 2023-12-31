@@ -439,7 +439,7 @@ function addToCloudRecordings(audioUrl, audioDate) {
 
         const download = document.createElement('img');
         download.setAttribute('src', 'icons/cloud-download.svg');
-        download.setAttribute('class', 'download-button');
+        download.classList.add('download-button', 'audio-entry-button');
         audioEntryDiv.appendChild(download);
 
         cloudList.appendChild(audioEntryDiv);

@@ -25,12 +25,12 @@ export default class audioEntry {
 
         const publish = document.createElement('img');
         publish.src = 'icons/cloud-upload.svg';
-        publish.classList.add('publish-button');
+        publish.classList.add('publish-button','audio-entry-button');
         this.div.appendChild(publish);
 
         const remove = document.createElement('img');
         remove.src = 'icons/delete.svg';
-        remove.classList.add('remove-button');
+        remove.classList.add('remove-button','audio-entry-button');
         this.div.appendChild(remove);
         return this;
     }

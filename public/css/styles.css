@@ -428,3 +428,10 @@ input[type="checkbox"] {
 #audio-header a:hover {
   background-color: transparent;
 }
+
+.audio-entry-button{
+  border: white;
+  border-radius: 5px;
+  border-width: 1px;
+  border-style: solid;
+}
