@@ -149,7 +149,7 @@ class App {
     upload() {
         const fileNum = cloudList.childElementCount;
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
-        body.append("recording", this.blob, `${user_id}:Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
+        body.append("recording", this.blob, `${user_id}_Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
         fetch(`${url}/upload/${user_id}`, {
             method: "POST", // usaremos el método POST para subir el audio
             headers: {},
