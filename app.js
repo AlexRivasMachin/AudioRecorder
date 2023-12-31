@@ -14,7 +14,7 @@ const port = 5000;
 
 const authRouter = require('./routes/auth');
 
-
+/*
 //para meterlos en mongo aunque sea solo una vez
 const audioFiles = [
     {
@@ -42,6 +42,7 @@ audioFiles.forEach(file => {
         }
     });
 });
+*/
 
 app.use(session({
     secret: 'your-secret-key',
@@ -254,8 +255,6 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
     });
 });
 
-
-
 app.listen(port, () => console.log(`Listening on port ${port}!`));
 
 /**
@@ -285,7 +284,5 @@ async function handleList(userId) {
         });
     });
 }
-
-
 
 module.exports = app;
