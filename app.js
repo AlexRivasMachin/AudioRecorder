@@ -80,7 +80,7 @@ function ensureAuthenticatedEnpoint(req, res, next) {
     if (req.user) {
         return next();
     } else {
-        res.sendStatus(403);
+        res.sendStatus(403).end();
     }
 }
 
@@ -155,7 +155,8 @@ const upload = multer({
 app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            res.send(err);
+            res.status(500).send(err);
+            return; // Cancel the insert if an error occurs
         } else {
             const userId = req.params.name;
             const audio = {
@@ -164,27 +165,26 @@ app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
                 date: Date.now(),
                 accessed: 0
             };
+            if (!fs.existsSync(path.join(__dirname, 'recordings'))) {
+                fs.mkdirSync(path.join(__dirname, 'recordings'));
+            }
+            const destinationPath = path.join(__dirname, 'recordings', audio.filename);
+
+            // Mueve el archivo de la carpeta temporal a la carpeta recordings
+            fs.rename(req.file.path, destinationPath, (err) => {
+                if (err) {
+                    res.status(500).bod('Algo a ido mal, vuelve a probar más tarde rename').end();
+                    return; // Cancel the insert if there's an error
+                }
+            });
             db.grabaciones.insert(audio, async (err, doc) => {
                 if (err) {
-                    res.send(err);
-                } else {
-                    if (!fs.existsSync(path.join(__dirname, 'recordings'))) {
-                        fs.mkdirSync(path.join(__dirname, 'recordings'));
-                    }
-                    const destinationPath = path.join(__dirname, 'recordings', audio.filename);
+                    res.status(409).send('El audio ya esta en la nube').end();
+                } 
 
-                    // Mueve el archivo de la carpeta temporal a la carpeta recordings
-                    fs.rename(req.file.path, destinationPath, (err) => {
-                        if (err) {
-                            console.log(err);
-                            res.sendStatus(500);
-                        }
-                    });
-
-                    await handleList(userId)
-                        .then((files) => res.json(files))
-                        .catch((err) => res.sendStatus(500));
-                }
+                await handleList(userId)
+                    .then((files) => res.json(files))
+                    .catch((err) => res.status(500).send('Algo a ido mal, vuelve a probar más tarde handle list'));
             });
         }
     });
