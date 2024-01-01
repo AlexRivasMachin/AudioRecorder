@@ -210,15 +210,12 @@ class App {
         divAudioElements.removeChild(statusButtons);
 
         try{
-            const response = await fetch(`/api/play/${playMode}`);
-            const data = await response.json();
-            this.setAudio(data._id);
+            const data = await fetch(`/api/play/${playMode}`).then(response => response.json());
+            const audioUrl = await fetch(`${url}/getRecordingUrl/${encodeURIComponent(data.filename)}`).then(response => response.json()).then(data => data.url);
+            this.setAudio(audioUrl);
         }catch (error) {
             window.location.replace(`${url}/error404`);
         }
-
-        this.setAudio(playMode);
-        console.log(state);
     }
 
     uploadAudio(audioUrl) {
