@@ -292,7 +292,7 @@ async function handleList(userId) {
     // TODO actualizar el accessed
     return new Promise((resolve, reject) => {
         let files = { files: [] };
-        db.grabaciones.find({ userId: userId }).sort({ date: -1 }).limit(5, (err, docs) => {
+        db.grabaciones.find({ userId: userId }).sort({ date: -1 }, (err, docs) => {
             if (err) {
                 reject(err);
             } else {

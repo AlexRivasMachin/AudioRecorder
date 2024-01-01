@@ -134,6 +134,10 @@ class App {
         this.audioPlayer.src = audioURL;
     }
 
+    changeAudioUrl(audioURL) {
+        this.audioPlayer.src = audioURL;
+    }
+
     playAudio() {
         this.audioPlayer.play();
     };
@@ -146,10 +150,13 @@ class App {
         this.audioPlayer.stop();
     };
 
-    upload() {
+    async upload() {
         const fileNum = cloudList.childElementCount;
         const body = new FormData(); // Mediante FormData podremos subir el audio al servidor
-        body.append("recording", this.blob, `${user_id}_Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
+        let audioBlob = await this.getAudioBlob();
+
+        body.append("recording", audioBlob, `${user_id}_Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
+
         fetch(`${url}/upload/${user_id}`, {
             method: "POST", // usaremos el método POST para subir el audio
             headers: {},
@@ -178,6 +185,13 @@ class App {
             });
     };
 
+    getAudioBlob() {
+        let audioPlayer = this.getAudioPlayer();
+        let audioSrc = audioPlayer.src;
+        return fetch(audioSrc)
+            .then((res) => res.blob());
+    }
+
     deleteFile() {
     };
 
@@ -205,6 +219,11 @@ class App {
 
         this.setAudio(playMode);
         console.log(state);
+    }
+
+    uploadAudio(audioUrl) {
+        app.changeAudioUrl(audioUrl);
+        app.upload();
     }
 }
 
@@ -324,6 +343,10 @@ const cloudActionState = {
 cloudActionsBtnImg.addEventListener('click', () => {
     const state = cloudActionsBtnInstance.getState();
     if (existsAudioWithPlayingClass() && state == cloudActionState.Upload) {
+        let audioEntryDiv = getAudiosWithPlayingClass()[0];
+        let audioUrl = getAudioEntryDivAudioURL(audioEntryDiv);
+
+        app.uploadAudio(audioUrl);
         removeAudioWithPlayingClass();
     } else {
         donwloadAudioFromAudioEntryDiv(getAudiosWithPlayingClass()[0]);
@@ -465,8 +488,8 @@ function getAudioEntryDivAudioURL(audioEntryDiv) {
 
 recentList.addEventListener('click', (e) => {
     const audioEntryDiv = e.target.closest('.audio-entry');
+    const audioUrl = getAudioEntryDivAudioURL(audioEntryDiv);
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-date') || e.target.classList.contains('audio-entry')) {
-        const audioUrl = getAudioEntryDivAudioURL(audioEntryDiv);
         cloudActionsBtnInstance.setState(cloudActionState.Upload);
         playTargetedAudio(audioEntryDiv, audioUrl);
     }
@@ -475,7 +498,7 @@ recentList.addEventListener('click', (e) => {
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('publish-button')) {
         //lo subirá al api/list y si no está en local lo publica
-        app.upload();
+        app.uploadAudio(audioUrl);
     }
 });
 
