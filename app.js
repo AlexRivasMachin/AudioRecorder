@@ -243,6 +243,7 @@ app.get('/api/play/:filename', (req, res) => {
     });
 });
 
+
 app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,next) => {
     // Esta función borrara :filename de la carpeta recordings TO-DO
     // además, lo borrará también de la base de datos. Erabiltzailearen :check
