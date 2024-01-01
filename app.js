@@ -233,7 +233,7 @@ app.get('/api/play/:filename', (req, res) => {
             res.send(err);
         }
         else if (!doc) {
-            res.status(404);
+            res.sendFile(path.join(__dirname, 'public/error404.html'));
         }
         // if found, send the audio file
         else {
@@ -241,10 +241,6 @@ app.get('/api/play/:filename', (req, res) => {
             res.json(doc);
         }
     });
-});
-
-app.get('/error404', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/error404.html'));
 });
 
 app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,next) => {
