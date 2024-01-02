@@ -152,7 +152,7 @@ const upload = multer({
 }).single("recording");
 
 
-app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
+app.post("/api/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
             res.status(500).send(err);
@@ -173,7 +173,7 @@ app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
             // Mueve el archivo de la carpeta temporal a la carpeta recordings
             fs.rename(req.file.path, destinationPath, (err) => {
                 if (err) {
-                    res.status(500).bod('Algo a ido mal, vuelve a probar más tarde').end();
+                    res.status(500).send('Algo a ido mal, vuelve a probar más tarde').end();
                     return; // Cancel the insert if there's an error
                 }
             });

@@ -157,32 +157,31 @@ class App {
 
         body.append("recording", audioBlob, `${user_id}_Audio${fileNum}`); // en el atributo recording de formData guarda el audio para su posterior subida
 
-        fetch(`${url}/upload/${user_id}`, {
+        fetch(`${url}/api/upload/${user_id}`, {
             method: "POST", // usaremos el método POST para subir el audio
             headers: {},
             body: body
-        })
-            .then((res) => {
-                    if (res.status == 403) {
-                        Snackbar.show({ pos: 'bottom-center', text: 'Inicia session para poder subir audios', actionText: 'Ocultar' });
-                        return;
-                    } else if (res.status == 409) {
-                        Snackbar.show({ pos: 'bottom-center', text: 'El audio ya esta en la nube', actionText: 'Ocultar' });
-                        return;
-                    } else if (res.status == 500) {
-                        Snackbar.show({ pos: 'bottom-center', text: 'Algo a ido mal, vuelve a probar más tarde', actionText: 'Ocultar' });
-                        return;
-                    }
-                    res.json();
-                }
-            ) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
-            .then((json) => {
-                Snackbar.show({ pos: 'bottom-center', text: 'El audio se ha subido correctamente', actionText: 'Ocultar' });
-                getRemoteAudioList();
-            })
-            .catch((err) => {
-                Snackbar.show({ pos: 'bottom-center', text: 'Algo ha ido mal, prueba de nuevo dentro de unos minutos', actionText: 'Ocultar' });
-            });
+        }).then((res) => {
+            switch (res.status) {
+                case 200:
+                    return res.json();
+                case 403:
+                    Snackbar.show({ pos: 'bottom-center', text: 'Inicia session para poder subir audios', actionText: 'Ocultar' });
+                    break;
+                case 409:
+                    Snackbar.show({ pos: 'bottom-center', text: 'El audio ya esta en la nube', actionText: 'Ocultar' });
+                    break;
+                case 500:
+                    Snackbar.show({ pos: 'bottom-center', text: 'Algo a ido mal, vuelve a probar más tarde', actionText: 'Ocultar' });
+                    break;
+            }
+        }).then((data) => {
+            // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
+            Snackbar.show({ pos: 'bottom-center', text: 'El audio se ha subido correctamente', actionText: 'Ocultar' });
+            actualizarServidorVisual(data.files);
+        }).catch((err) => {
+            Snackbar.show({ pos: 'bottom-center', text: 'Algo ha ido mal, prueba de nuevo dentro de unos minutos', actionText: 'Ocultar' });
+        });
     };
 
     getAudioBlob() {
