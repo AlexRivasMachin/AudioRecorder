@@ -173,7 +173,7 @@ app.post("/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
             // Mueve el archivo de la carpeta temporal a la carpeta recordings
             fs.rename(req.file.path, destinationPath, (err) => {
                 if (err) {
-                    res.status(500).bod('Algo a ido mal, vuelve a probar más tarde rename').end();
+                    res.status(500).bod('Algo a ido mal, vuelve a probar más tarde').end();
                     return; // Cancel the insert if there's an error
                 }
             });

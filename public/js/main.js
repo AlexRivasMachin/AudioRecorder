@@ -167,21 +167,21 @@ class App {
                         Snackbar.show({ pos: 'bottom-center', text: 'Inicia session para poder subir audios', actionText: 'Ocultar' });
                         return;
                     } else if (res.status == 409) {
-                        Snackbar.show({ pos: 'bottom-center', text: res.body, actionText: 'Ocultar' });
+                        Snackbar.show({ pos: 'bottom-center', text: 'El audio ya esta en la nube', actionText: 'Ocultar' });
                         return;
                     } else if (res.status == 500) {
-                        Snackbar.show({ pos: 'bottom-center', text: res.body, actionText: 'Ocultar' });
+                        Snackbar.show({ pos: 'bottom-center', text: 'Algo a ido mal, vuelve a probar más tarde', actionText: 'Ocultar' });
                         return;
                     }
-                    res.json()
+                    res.json();
                 }
             ) // el servidor, una vez recogido el audio, devolverá la lista de todos los ficheros a nombre del presente usuario(inlcuido el que se acaba de subir)
             .then((json) => {
+                Snackbar.show({ pos: 'bottom-center', text: 'El audio se ha subido correctamente', actionText: 'Ocultar' });
                 getRemoteAudioList();
             })
             .catch((err) => {
                 Snackbar.show({ pos: 'bottom-center', text: 'Algo ha ido mal, prueba de nuevo dentro de unos minutos', actionText: 'Ocultar' });
-                console.log("Error subiendo el archivo");
             });
     };
 
