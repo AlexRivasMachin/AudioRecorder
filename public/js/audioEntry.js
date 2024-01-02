@@ -1,5 +1,10 @@
+const cloudActionState = {
+    Upload: 'upload button',
+    Download: 'download button',
+}
+
 export default class audioEntry {
-    constructor(audioUrl, audioDate) {
+    constructor(audioUrl, audioDate, buttonState) {
         this.div = document.createElement('div');
         this.audiURL = audioUrl;
         this.div.classList.add('audio-entry');
@@ -23,10 +28,22 @@ export default class audioEntry {
         });
         this.div.appendChild(date);
 
-        const publish = document.createElement('img');
-        publish.src = 'icons/cloud-upload.svg';
-        publish.classList.add('publish-button','audio-entry-button');
-        this.div.appendChild(publish);
+        switch(buttonState) {
+            case cloudActionState.Upload :
+                const publish = document.createElement('img');
+                publish.src = 'icons/cloud-upload.svg';
+                publish.classList.add('publish-button','audio-entry-button');
+                publish.alt = buttonState;
+                this.div.appendChild(publish);
+                break;
+            case cloudActionState.Download:
+                const download = document.createElement('img');
+                download.setAttribute('src', 'icons/cloud-download.svg');
+                download.classList.add('download-button', 'audio-entry-button');
+                download.alt = buttonState;
+                this.div.appendChild(download);
+                break;
+        }
 
         const remove = document.createElement('img');
         remove.src = 'icons/delete.svg';

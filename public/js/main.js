@@ -440,7 +440,7 @@ function sleep(ms) {
 
 function addToLastRecordings(audioUrl, audioDate) {
     try {
-        const audioEntryDiv = new audioEntry(audioUrl, audioDate).getDiv();
+        const audioEntryDiv = new audioEntry(audioUrl, audioDate, cloudActionState.Upload).getDiv();
         recentList.append(audioEntryDiv);
     }
     catch (error) {
@@ -450,17 +450,12 @@ function addToLastRecordings(audioUrl, audioDate) {
 
 function addToCloudRecordings(audioUrl, audioDate) {
     try {
-        const audioEntryDiv = new audioEntry(audioUrl, audioDate).getDiv();
+        const audioEntryDiv = new audioEntry(audioUrl, audioDate, cloudActionState.Download).getDiv();
         Array.from(audioEntryDiv.children).forEach(c => {
             if (c.classList.contains('publish-button')) {
                 c.parentNode.removeChild(c);
             }
         });
-
-        const download = document.createElement('img');
-        download.setAttribute('src', 'icons/cloud-download.svg');
-        download.classList.add('download-button', 'audio-entry-button');
-        audioEntryDiv.appendChild(download);
 
         cloudList.appendChild(audioEntryDiv);
     }
