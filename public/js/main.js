@@ -502,7 +502,30 @@ cloudList.addEventListener('click', (e) => {
         playTargetedAudio(audioEntryDiv, audioUrl);
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
-        deleteRecording(audioEntryDiv);
+        const audioUrl = audioEntryDiv.querySelector('.play-button').dataset.audio;
+        const fileName = audioUrl.split('/').pop();
+        fetch(`${url}/api/delete/${fileName}`)
+        .then(response => {
+            switch (response.status) {
+                case 200:
+                    Snackbar.show({ pos: 'bottom-center', text: 'El audio se ha eliminado correctamente', actionText: 'Ocultar' });
+                    deleteRecording(audioEntryDiv);
+                    return response.json();
+                case 403:
+                    Snackbar.show({ pos: 'bottom-center', text: 'Inicia session para poder eliminar audios', actionText: 'Ocultar' });
+                    break;
+                case 404:
+                    Snackbar.show({ pos: 'bottom-center', text: 'El audio que quieres eliminar ya no existe', actionText: 'Ocultar' });
+                    break;
+                case 500:
+                    Snackbar.show({ pos: 'bottom-center', text: 'Algo a ido mal, vuelve a probar más tarde', actionText: 'Ocultar' });
+                    break;
+            }
+        })
+        .then(data => actualizarServidorVisual(data.files))
+        .catch(error => {
+            Snackbar.show({ pos: 'bottom-center', text: 'Algo ha ido mal, prueba de nuevo dentro de unos minutos', actionText: 'Ocultar' });
+        });
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('download-button')) {
         donwloadAudioFromAudioEntryDiv(audioEntryDiv);
