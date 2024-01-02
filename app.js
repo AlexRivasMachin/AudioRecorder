@@ -257,6 +257,7 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
             res.status(404).send('No se ha encontrado el audio').end();
         }
         else{
+            const id = doc.userId;
             fs.unlink(path.join(__dirname, 'recordings', filename), (err) => {
                 if (err) {
                     res.sendStatus(500).send('Algo a ido mal, vuelve a probar más tarde').end();
@@ -265,7 +266,7 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
                         if (err) {
                             res.sendStatus(500).send('Algo a ido mal, vuelve a probar más tarde').end();
                         } else {
-                            handleList()
+                            handleList(id)
                             .then((files) => res.json(files))
                             .catch((err) => res.sendStatus(500).send('No se ha podido obtener la lista de audios recientes'));
                         }
