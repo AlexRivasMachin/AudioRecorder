@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/transformer.css">
     <link rel="stylesheet" href="utils/snackbar/snackbar.min.css" />
     <link rel="icon" href="icons/microfono.ico" type="image/x-icon" />
 
@@ -11,7 +12,22 @@
   </head>
 
   <body>
+
     <section class="audio-area">
+      <section class="transformer">
+        <div id="title">
+             <h3>Transcribe tus audios aqui</h3>
+        <button id="language-button">ENG</button>
+        </div>
+        <div class="transformer-input">
+          <input
+            type="text"
+            id="audio-link"
+            placeholder="pega el link aqui"
+          />
+          <button id="transform-button">Transformar</button>
+        </div>
+      </section>
       <div class="audio-toolbar">
         <div id="audio-header">
           <h1>Tus Audios</h1>
