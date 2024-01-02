@@ -3,6 +3,15 @@ const cloudActionState = {
     Download: 'download button',
 }
 
+const dateFormats = {
+    sameDay: '[hoy] h:mm A',
+    nextDay: '[mañana] h:mm A',
+    nextWeek: 'dddd h:mm A',
+    lastDay: '[ayer] h:mm A',
+    lastWeek: 'dddd h:mm A',
+    sameElse: 'DD/MM/YYYY h:mm A'
+};
+
 export default class audioEntry {
     constructor(audioUrl, audioDate, buttonState) {
         this.div = document.createElement('div');
@@ -18,14 +27,18 @@ export default class audioEntry {
         const date = document.createElement('p');
         date.classList.add('audio-date');
         moment.locale('es');
-        date.innerHTML = moment(audioDate).calendar(null, {
-            sameDay: '[hoy] h:mm A',
-            nextDay: '[mañana] h:mm A',
-            nextWeek: 'dddd h:mm A',
-            lastDay: '[ayer] h:mm A',
-            lastWeek: 'dddd h:mm A',
-            sameElse: 'DD/MM/YYYY h:mm A'
-        });
+        // Check if audioDate matches any of the formats
+        let isValidDate = false;
+        for (let format of Object.values(dateFormats)) {
+            if (moment(audioDate, format, true).isValid()) {
+                isValidDate = true;
+            }
+        }
+        if(isValidDate){
+            date.innerHTML = audioDate;
+        }else{
+            date.innerHTML = moment(audioDate).calendar(null, dateFormats);
+        }
         this.div.appendChild(date);
 
         switch(buttonState) {
