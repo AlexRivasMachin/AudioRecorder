@@ -13,21 +13,25 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 app.use(cors());
 
+//Para socket.io
 const socketIO = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
-
+server.listen(5001, () => {
+    console.log('Servidor corriendo en puerto 5001');
+});
 const io = require("socket.io")(server, {
     cors: {
-        origin: "http://localhost:80",
+        origin: "*",
         methods: ["GET", "POST"],
-        allowedHeaders: ["my-custom-header"],
-        credentials: true
+        credentials: false
     }
 });
+
 const port = 5000;
-const maxAudioAge = 20000; // 20 segundos
-const intervaloCleanup = 10000; // 10 segundos
+
+const maxAudioAge = 1000 * 60 * 60 * 24 * 5; // 5 dias
+const intervaloCleanup = 1000 * 60 * 60; // 1 hora
 
 const authRouter = require('./routes/auth');
 

@@ -58,11 +58,8 @@ class App {
         this.audioPlayer = document.getElementById("audio");
         this.mediaRecorder = undefined;
         this.audioChunks = [];
-        this.socket = io("http://localhost:5000", {
-            withCredentials: true,
-            extraHeaders: {
-                "my-custom-header": "abcd"
-            }
+        this.socket = io("http://localhost:5001", {
+            withCredentials: false,
         });
     };
 
@@ -74,9 +71,20 @@ class App {
     };
 
     addOnAudiosDeletedEvent() {
-        this.socket.on('actualizarListaDeAudios', () => {
-            getRemoteAudioList();
+        this.socket.on('actualizarListaDeAudios', async () => {
+            await getRemoteAudioList();
+            this.siAudioActualHaSidoEliminadoVolverAGrabar();
         });
+    }
+
+    /**
+     * Si el audio que se esta reproduciendo se ha eliminado (en caso de estar esuchándolo direactamente desde el servidor), se volverá a grabar.
+     * Para que no se intente bajar un audio que ya no existe.
+     */
+    siAudioActualHaSidoEliminadoVolverAGrabar() {
+        if (!existsAudioWithPlayingClass()) {
+            setState({ recording: false, stoped: true, playing: false, paused: false });
+        }
     }
 
     #getPermisosMicrofono() {
@@ -392,6 +400,7 @@ function removeAudioWithPlayingClass() {
 }
 
 function getAudiosWithPlayingClass() {
+    let debug = document.querySelectorAll('.playing');
     return document.querySelectorAll('.playing');
 }
 
