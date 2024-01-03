@@ -12,8 +12,15 @@ audioButton.addEventListener('click', async () => {
     console.log(codigoAudio);
 
     try {
+        // Hacer una solicitud al servidor para obtener la URL del archivo de audio
+        const responseUrl = await fetch(`/getRecordingUrl/${codigoAudio}`);
+        const dataUrl = await responseUrl.json();
+        const audioURL = dataUrl.url;
+        console.log(audioURL);
+        //pilla el audio, pero no es wav ni nada es opus hay que convertirlo a wav
+
         // Realiza una solicitud al servidor para transcribir el audio
-        const response = await fetch(`/transcribe/${codigoAudio}`);
+        const response = await fetch(`/transcribe/${audioURL}`);
         const data = await response.json();
 
         // Actualiza el elemento de salida con la transcripción
