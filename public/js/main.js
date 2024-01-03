@@ -6,6 +6,7 @@ import cloudActionsBtn from './cloudActionsButton.js';
 import backToRecordingBtn from './backToRecordingButton.js';
 import audioEntry from './audioEntry.js';
 import cloudActionsButton from './cloudActionsButton.js';
+import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
 
 const timer = new Timer(document.getElementById('timer'));
 const recordedTimeDiv = document.getElementById('recorded-time');
@@ -17,6 +18,7 @@ const divPrincipal = document.querySelector('.audio-area');
 const divAudios = document.querySelector('.audio-toolbar');
 const divAudioElements = document.querySelector('.audioElements');
 const url = window.location.origin;
+
 
 let user_id;
 let app;
@@ -56,13 +58,26 @@ class App {
         this.audioPlayer = document.getElementById("audio");
         this.mediaRecorder = undefined;
         this.audioChunks = [];
+        this.socket = io("http://localhost:5000", {
+            withCredentials: true,
+            extraHeaders: {
+                "my-custom-header": "abcd"
+            }
+        });
     };
 
     init() {
         this.#getPermisosMicrofono();
         this.initAudio();
         this.setPlayModeIfNeeded();
+        this.addOnAudiosDeletedEvent();1
     };
+
+    addOnAudiosDeletedEvent() {
+        this.socket.on('actualizarListaDeAudios', () => {
+            getRemoteAudioList();
+        });
+    }
 
     #getPermisosMicrofono() {
         navigator.mediaDevices
@@ -221,6 +236,7 @@ class App {
         app.changeAudioUrl(audioUrl);
         app.upload();
     }
+
 }
 
 //obtener id de usuario
