@@ -35,36 +35,6 @@ const intervaloCleanup = 1000 * 60 * 60; // 1 hora
 
 const authRouter = require('./routes/auth');
 
-/*
-//para meterlos en mongo aunque sea solo una vez
-const audioFiles = [
-    {
-        "filename": "57dcdae8dea1270bb922eb53c0c1d58a",
-        "date": 1694187731170
-    },
-    {
-        "filename": "7f85adaba7d9a9e178e8a1bd8fefa9ce",
-        "date": 1694170942916
-    },
-    {
-        "filename": "44ecc096c58ec33c0ee6156dd9024e4c",
-        "date": 1693776011113
-    }
-];
-
-audioFiles.forEach(file => {
-    db.grabaciones.findOne({ filename: file.filename }, (err, doc) => {
-        if (err) {
-            console.log(err);
-        } else if (!doc) {
-            db.grabaciones.insert(file, (err, doc));
-        } else {
-            console.log('File already exists:', doc);
-        }
-    });
-});
-*/
-
 app.use(session({
     secret: 'your-secret-key',
     cookie: { maxAge: 60 * 60 * 1000 },
@@ -197,30 +167,7 @@ app.post("/api/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
                     return; // Cancel the insert if there's an error
                 }
             });
-            /*
-            const audioSinElNombreDelFinal = audio.filename.split('_')[0];
-            console.log(audioSinElNombreDelFinal);
-            // busca un audio que comienza con audioSinElNombreDelFinal
-            db.grabaciones.findOne({ filename: new RegExp('^' + audioSinElNombreDelFinal) }, (err, doc) => {
-                if (err) {
-                    console.error(err);
-                } else if (doc) {
-                    console.log('Ya existe un audio que comienza con ' + audioSinElNombreDelFinal);
-                } else {
-                    // si no se encontró ningún audio, inserta el nuevo audio
-                    db.grabaciones.insert(audio, async (err, doc) => {
-                        if (err) {
-                         res.status(409).send('El audio ya esta en la nube').end();
-                        } else {
-                            console.log('Audio insertado:', doc);
-                        }
-                        await handleList(userId)
-                            .then((files) => res.json(files))
-                            .catch((err) => res.status(500).send('Algo a ido mal, vuelve a probar más tarde handle list'));
-                        });
-                }
-            });
-            */
+
             db.grabaciones.insert(audio, async (err, doc) => {
                 if (err) {
                     res.status(409).send('El audio ya esta en la nube').end();
@@ -372,3 +319,50 @@ function acutalizarListaDeAudiosDeClientes(){
 }
 
 module.exports = app;
+
+// Ruta para transcribir el audio
+// Ruta para transcribir el audio
+app.get('/transcribe/:audioURL', async (req, res) => {
+    const audioURL = req.params.audioURL;
+    console.log(audioURL);
+
+    const filename = req.params.filename;
+    console.log(filename);
+
+
+        //try{
+        /*
+        const doc = await new Promise((resolve, reject) => {
+            db.grabaciones.findOne({ filename: filename }, (err, doc) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(doc);
+                    console.log(doc);
+                }
+            });
+        });
+
+        if (!doc) {
+            console.log('Audio no encontrado');
+            res.status(404).send('Audio no encontrado');
+            return;
+        }
+        */
+        // Importar dinámicamente el módulo ESM
+        const { pipeline,env } = await import('@xenova/transformers');
+
+        // Configurar el modelo
+        env.allowLocalModels = false;
+
+        // Transcribir el audio
+        const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
+        const output = await transcriber(audioURL);
+        console.log(output);
+        res.json(output);
+
+    /*} catch (error) {
+        console.error(error);
+        res.status(500).send('Error interno del servidor');
+    }*/
+});
