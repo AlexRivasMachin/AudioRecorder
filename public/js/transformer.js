@@ -1,38 +1,26 @@
-// transformer.js
-import { pipeline } from '@xenova/transformers';
+const audioInput = document.getElementById("audio-link");
+const audioButton = document.getElementById("transform-button");
+const pElement = document.getElementById("salida");
 
-const transformers = new Transformers();
+audioButton.addEventListener('click', async () => {
+    const audioLink = audioInput.value;
+    // Divide la URL utilizando el carácter "=" como separador
+    const partesUrl = audioLink.split('=');
 
-export async function analyzeSentiment(text) {
-    let pipe = await pipeline('sentiment-analysis');
-    let out = await pipe(text);
-    return out;
-}
+    // Accede al último elemento del array resultante
+    const codigoAudio = partesUrl[partesUrl.length - 1];
+    console.log(codigoAudio);
 
-export function transcribe(nomAudio){
-    // Obtener el audio de la base de datos
-    db.grabaciones.findOne({ filename: `${nomAudio}` }, (err, doc) => {
-        if (err) {
-            console.error(err);
-        } else if (doc) {
-            // Guardar el audio en un archivo
-            const filepath = path.join(__dirname, 'recordings', doc.filename);
-            fs.writeFile(filepath, doc.audio.buffer, (err) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    // Transcribir el audio
-                    transformers.transcribe(filepath)
-                        .then(transcription => {
-                            console.log(transcription);
-                        })
-                        .catch(error => {
-                            console.error(error);
-                        });
-                }
-            });
-        } else {
-            console.log('Audio no encontrado');
-        }
-    });
-}
+    try {
+        // Realiza una solicitud al servidor para transcribir el audio
+        const response = await fetch(`/transcribe/${codigoAudio}`);
+        const data = await response.json();
+
+        // Actualiza el elemento de salida con la transcripción
+        pElement.innerText = data;
+
+    } catch (error) {
+        console.error(error);
+        pElement.innerText = 'Error al transcribir el audio';
+    }
+});

@@ -11,7 +11,6 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const port = 5000;
-
 const authRouter = require('./routes/auth');
 
 /*
@@ -308,3 +307,50 @@ async function handleList(userId) {
 }
 
 module.exports = app;
+
+// Ruta para transcribir el audio
+// Ruta para transcribir el audio
+app.get('/transcribe/:filename', async (req, res) => {
+        const filename = req.params.filename;
+        console.log(nomAudio);
+
+
+        //try{
+        const doc = await new Promise((resolve, reject) => {
+            db.grabaciones.findOne({ filename: filename }, (err, doc) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(doc);
+                    console.log(doc);
+                }
+            });
+        });
+
+        if (!doc) {
+            console.log('Audio no encontrado');
+            res.status(404).send('Audio no encontrado');
+            return;
+        }
+
+        // Importar dinámicamente el módulo ESM
+        const { pipeline,env } = await import('@xenova/transformers');
+
+        // Configurar el modelo
+        env.allowLocalModels = false;
+
+        // Transcribir el audio
+        const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
+        const output = await transcriber(doc);
+        console.log(output);
+
+        const transcription = await pipeline(doc.audio.buffer);
+        console.log(transcription);
+
+        res.json(output);
+
+    /*} catch (error) {
+        console.error(error);
+        res.status(500).send('Error interno del servidor');
+    }*/
+});
