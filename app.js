@@ -9,8 +9,26 @@ const multer = require('multer');
 const passport = require('passport');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+
 const cors = require('cors');
+app.use(cors());
+
+const socketIO = require('socket.io');
+const http = require('http');
+const server = http.createServer(app);
+
+const io = require("socket.io")(server, {
+    cors: {
+        origin: "http://localhost:80",
+        methods: ["GET", "POST"],
+        allowedHeaders: ["my-custom-header"],
+        credentials: true
+    }
+});
 const port = 5000;
+const maxAudioAge = 20000; // 20 segundos
+const intervaloCleanup = 10000; // 
+
 const authRouter = require('./routes/auth');
 
 /*
@@ -52,7 +70,6 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(cors());
 
 /**
  * This middlewhere checks if the user is authenticated
@@ -304,6 +321,50 @@ async function handleList(userId) {
             }
         });
     });
+}
+
+setInterval(cleanup, intervaloCleanup);
+
+function cleanup(){
+
+    const horaActual = Date.now();
+    const horaLimite = horaActual - maxAudioAge;
+
+    db.grabaciones.find({date: {$lt: horaLimite}}, (err, docs) => {
+        if(err){
+            console.log(err);
+        }
+        else{
+            docs.forEach(doc => {
+                eliminarAudio(doc);
+                console.log("eliminando audio: " + doc.filename);
+            });
+        }
+    });
+}
+
+function eliminarAudio(doc){
+    fs.unlink(path.join(__dirname, 'recordings', doc.filename), (err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            eliminarAudioDeBd(doc);
+            acutalizarListaDeAudiosDeClientes();
+        }
+    });
+}
+
+function eliminarAudioDeBd(doc){
+    console.log("eliminando audio de la bd: " + doc.filename);
+    db.grabaciones.remove({ filename: doc.filename }, (err, doc) => {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+
+function acutalizarListaDeAudiosDeClientes(){
+    io.emit('actualizarListaDeAudios');
 }
 
 module.exports = app;
