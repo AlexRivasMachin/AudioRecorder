@@ -392,3 +392,58 @@ app.get('/transcribe/:fileName', async (req, res) => {
     const output = await transcriber(audioData);
     res.json(output);
 });
+
+// Ruta para transcribir el audio en Español
+app.get('/transcribeESP/:fileName', async (req, res) => {
+    const filename = req.params.fileName;
+
+    const audioURL = `${req.protocol}://${req.get('host')}/recordings/${filename}`;
+
+    // Load audio data
+    let buffer = Buffer.from(await fetch(audioURL).then(x => x.arrayBuffer()));
+
+    // Read .wav file and convert it to required format
+    let audioData;
+    try{
+        let wav = new wavefile.WaveFile(buffer);
+        wav.toBitDepth('32f'); // Pipeline expects input as a Float32Array
+        wav.toSampleRate(16000); // Whisper expects audio with a sampling rate of 16000
+        audioData = wav.getSamples();
+        if (Array.isArray(audioData)) {
+            if (audioData.length > 1) {
+                const SCALING_FACTOR = Math.sqrt(2);
+
+                // Merge channels (into first channel to save memory)
+                for (let i = 0; i < audioData[0].length; ++i) {
+                audioData[0][i] = SCALING_FACTOR * (audioData[0][i] + audioData[1][i]) / 2;
+                }
+            }
+
+            // Select first channel
+            audioData = audioData[0];
+        }
+    }catch(err){
+        console.log(err.message)
+        if(err.message == 'Not a supported format.'){
+            res.status(409).send('Tienes que subir el audio para poder transcribirlo').end();
+            return;
+        }
+        res.status(500).send('Algo a ido mal, vuelve a probar más tarde').end();
+        return;
+    }
+    
+
+    // Importar dinámicamente el módulo ESM
+    const { pipeline,env } = await import('@xenova/transformers');
+
+    // Configurar el modelo
+    env.allowLocalModels = false;
+
+    // Transcribir el audio
+    const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-small');
+
+    // Transcribir el audio y si lo queremos traducir a otro idioma con task: 'translate'
+    const output = await transcriber(audioData, { language: 'spanish' , task: 'transcribe'});
+    res.json(output);
+});
+

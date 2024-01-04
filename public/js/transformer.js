@@ -1,6 +1,16 @@
 const audioInput = document.getElementById("audio-link");
 const audioButton = document.getElementById("transform-button");
 const pElement = document.getElementById("salida");
+const langButtom = document.getElementById("language-button");
+
+langButtom.addEventListener('click', async () => {
+    if(langButtom.innerText == "ENG"){
+        langButtom.innerText = "ESP";
+    }else if(langButtom.innerText == "ESP"){
+        langButtom.innerText = "ENG";
+    }
+    console.log(langButtom.innerText);
+});
 
 audioButton.addEventListener('click', async () => {
     const audioLink = audioInput.value;
@@ -9,10 +19,15 @@ audioButton.addEventListener('click', async () => {
 
     // Accede al último elemento del array resultante
     const audioFileName = partesUrl[partesUrl.length - 1];
-
+    pElement.innerText = 'Transcribiendo...';
     try {
         // Realiza una solicitud al servidor para transcribir el audio
-        const response = await fetch(`/transcribe/${audioFileName}`);
+        if(langButtom.innerText == "ENG"){
+            var response = await fetch(`/transcribe/${audioFileName}`);
+        }else if(langButtom.innerText == "ESP"){
+            var response = await fetch(`/transcribeESP/${audioFileName}`);
+        }
+        else var response = await fetch(`/transcribe/${audioFileName}`);
         
         if(response.status !== 200) {
             pElement.innerText = await response.text();
