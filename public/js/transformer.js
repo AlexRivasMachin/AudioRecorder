@@ -8,23 +8,16 @@ audioButton.addEventListener('click', async () => {
     const partesUrl = audioLink.split('=');
 
     // Accede al último elemento del array resultante
-    const codigoAudio = partesUrl[partesUrl.length - 1];
-    console.log(codigoAudio);
+    const audioFileName = partesUrl[partesUrl.length - 1];
+    console.log(audioFileName);
 
     try {
-        // Hacer una solicitud al servidor para obtener la URL del archivo de audio
-        const responseUrl = await fetch(`/getRecordingUrl/${codigoAudio}`);
-        const dataUrl = await responseUrl.json();
-        const audioURL = dataUrl.url;
-        console.log(audioURL);
-        //pilla el audio, pero no es wav ni nada es opus hay que convertirlo a wav
-
         // Realiza una solicitud al servidor para transcribir el audio
-        const response = await fetch(`/transcribe/${audioURL}`);
+        const response = await fetch(`/transcribe/${audioFileName}`);
         const data = await response.json();
 
         // Actualiza el elemento de salida con la transcripción
-        pElement.innerText = data;
+        pElement.innerText = data.text;
 
     } catch (error) {
         console.error(error);

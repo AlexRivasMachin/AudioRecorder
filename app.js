@@ -9,6 +9,8 @@ const multer = require('multer');
 const passport = require('passport');
 const session = require('express-session');
 const bodyParser = require('body-parser');
+const wavefile = require('wavefile');
+const ffmpeg = require('fluent-ffmpeg');
 
 const cors = require('cors');
 app.use(cors());
@@ -161,12 +163,29 @@ app.post("/api/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
             const destinationPath = path.join(__dirname, 'recordings', audio.filename);
 
             // Mueve el archivo de la carpeta temporal a la carpeta recordings
-            fs.rename(req.file.path, destinationPath, (err) => {
+            fs.renameSync(req.file.path, destinationPath, (err) => {
                 if (err) {
                     res.status(500).send('Algo a ido mal, vuelve a probar más tarde').end();
                     return; // Cancel the insert if there's an error
                 }
             });
+            
+            const newDestinationPath = path.join(__dirname, 'recordings', audio.filename + '.wav');
+
+            ffmpeg(destinationPath)
+                .output(newDestinationPath)
+                .on('end', () => {
+                    console.log('Conversion finished');
+                    // You can now use newDestinationPath as the path to the WAV file
+                })
+                .on('error', err => {
+                    console.error('An error occurred: ' + err.message);
+                    res.status(500).send('Algo a ido mal, vuelve a probar más tarde').end();
+                    return;
+                })
+                .run();
+
+            audio.filename = audio.filename + '.wav';
 
             db.grabaciones.insert(audio, async (err, doc) => {
                 if (err) {
@@ -175,7 +194,7 @@ app.post("/api/upload/:name", ensureAuthenticatedEnpoint, (req, res) => {
 
                 await handleList(userId)
                     .then((files) => res.json(files))
-                    .catch((err) => res.status(500).send('Algo a ido mal, vuelve a probar más tarde handle list'));
+                    .catch((err) => res.sendStatus(500));
             });
         }
     });
@@ -227,11 +246,11 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
             const id = doc.userId;
             fs.unlink(path.join(__dirname, 'recordings', filename), (err) => {
                 if (err) {
-                    res.sendStatus(500).send('Algo a ido mal, vuelve a probar más tarde').end();
+                    res.status(500).send('Algo a ido mal, vuelve a probar más tarde').end();
                 } else {
                     db.grabaciones.remove({ filename: filename }, (err, doc) => {
                         if (err) {
-                            res.sendStatus(500).send('Algo a ido mal, vuelve a probar más tarde').end();
+                            res.status(500).send('Algo a ido mal, vuelve a probar más tarde').end();
                         } else {
                             handleList(id)
                             .then((files) => res.json(files))
@@ -322,47 +341,44 @@ module.exports = app;
 
 // Ruta para transcribir el audio
 // Ruta para transcribir el audio
-app.get('/transcribe/:audioURL', async (req, res) => {
-    const audioURL = req.params.audioURL;
-    console.log(audioURL);
-
-    const filename = req.params.filename;
+app.get('/transcribe/:fileName', async (req, res) => {
+    const filename = req.params.fileName;
     console.log(filename);
 
+    const audioURL = `${req.protocol}://${req.get('host')}/recordings/${filename}`;
+    console.log(audioURL);
 
-        //try{
-        /*
-        const doc = await new Promise((resolve, reject) => {
-            db.grabaciones.findOne({ filename: filename }, (err, doc) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(doc);
-                    console.log(doc);
-                }
-            });
-        });
+    // Load audio data
+    let buffer = Buffer.from(await fetch(audioURL).then(x => x.arrayBuffer()));
 
-        if (!doc) {
-            console.log('Audio no encontrado');
-            res.status(404).send('Audio no encontrado');
-            return;
+    // Read .wav file and convert it to required format
+    let wav = new wavefile.WaveFile(buffer);
+    wav.toBitDepth('32f'); // Pipeline expects input as a Float32Array
+    wav.toSampleRate(16000); // Whisper expects audio with a sampling rate of 16000
+    let audioData = wav.getSamples();
+    if (Array.isArray(audioData)) {
+        if (audioData.length > 1) {
+            const SCALING_FACTOR = Math.sqrt(2);
+
+            // Merge channels (into first channel to save memory)
+            for (let i = 0; i < audioData[0].length; ++i) {
+            audioData[0][i] = SCALING_FACTOR * (audioData[0][i] + audioData[1][i]) / 2;
+            }
         }
-        */
-        // Importar dinámicamente el módulo ESM
-        const { pipeline,env } = await import('@xenova/transformers');
 
-        // Configurar el modelo
-        env.allowLocalModels = false;
+        // Select first channel
+        audioData = audioData[0];
+    }
 
-        // Transcribir el audio
-        const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
-        const output = await transcriber(audioURL);
-        console.log(output);
-        res.json(output);
+    // Importar dinámicamente el módulo ESM
+    const { pipeline,env } = await import('@xenova/transformers');
 
-    /*} catch (error) {
-        console.error(error);
-        res.status(500).send('Error interno del servidor');
-    }*/
+    // Configurar el modelo
+    env.allowLocalModels = false;
+
+    // Transcribir el audio
+    const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
+
+    const output = await transcriber(audioData);
+    res.json(output);
 });
