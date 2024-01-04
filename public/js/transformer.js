@@ -9,11 +9,16 @@ audioButton.addEventListener('click', async () => {
 
     // Accede al último elemento del array resultante
     const audioFileName = partesUrl[partesUrl.length - 1];
-    console.log(audioFileName);
 
     try {
         // Realiza una solicitud al servidor para transcribir el audio
         const response = await fetch(`/transcribe/${audioFileName}`);
+        
+        if(response.status !== 200) {
+            pElement.innerText = await response.text();
+            return;
+        }
+
         const data = await response.json();
 
         // Actualiza el elemento de salida con la transcripción
