@@ -508,6 +508,7 @@ recentList.addEventListener('click', (e) => {
     if ((e.target.tagName === 'IMG' && e.target.classList.contains('play-button')) || e.target.classList.contains('audio-date') || e.target.classList.contains('audio-entry')) {
         cloudActionsBtnInstance.setState(cloudActionState.Upload);
         playTargetedAudio(audioEntryDiv, audioUrl);
+        shareRecordingBtnInstance.disable();
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
         deleteRecording(audioEntryDiv);
@@ -524,6 +525,7 @@ cloudList.addEventListener('click', (e) => {
         const audioUrl = getAudioEntryDivAudioURL(audioEntryDiv);
         cloudActionsBtnInstance.setState(cloudActionState.Download);
         playTargetedAudio(audioEntryDiv, audioUrl);
+        shareRecordingBtnInstance.enable();
     }
     if (e.target.tagName === 'IMG' && e.target.classList.contains('remove-button')) {
         const audioUrl = audioEntryDiv.querySelector('.play-button').dataset.audio;
