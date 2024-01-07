@@ -1,9 +1,0 @@
-.idea
-.vscode
-
-multerTemp
-node_modules
-recordings
-
-*.md
-package-lock.json

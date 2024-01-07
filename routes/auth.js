@@ -9,7 +9,7 @@ const passport = require('passport');
 const express = require('express');
 
 const mongojs = require('mongojs');
-const MONGO_URI = 'mongodb://mongodb:27017/grabaciones';
+const MONGO_URI = 'mongodb://localhost:27017/grabaciones';
 const db = mongojs(MONGO_URI, ['users']);
 
 

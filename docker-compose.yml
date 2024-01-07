@@ -35,5 +35,4 @@ services:
 
 networks:
   audio-recorder-network:
-    driver: 'bridge'
-
+    driver: "bridge"

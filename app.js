@@ -3,7 +3,7 @@ const port_socket = 5001;
 
 const express = require('express');
 const mongojs = require('mongojs');
-const MONGO_URI = 'mongodb://mongodb:27017/grabaciones';
+const MONGO_URI = 'mongodb://localhost:27017/grabaciones';
 const db = mongojs(MONGO_URI, ['grabaciones']);
 const app = express();
 const path = require('path');
@@ -225,7 +225,7 @@ app.get('/api/play/:filename', (req, res) => {
         }
         // if found, send the audio file
         else {
-            console.log("enviando: " + doc);
+            db.grabaciones.update({ filename: doc.filename }, { $set: { accessed: Date.now() } });
             res.json(doc);
         }
     });
@@ -234,8 +234,6 @@ app.get('/api/play/:filename', (req, res) => {
 
 app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,next) => {
     // Esta función borrara :filename de la carpeta recordings TO-DO
-    // además, lo borrará también de la base de datos. Erabiltzailearen :check
-    // Devolverá como respuesta las últimas 5 grabaciones del usuario :check
     const filename = req.params.filename;
     db.grabaciones.findOne({ filename: filename }, (err, doc) => {
         if (err) {
