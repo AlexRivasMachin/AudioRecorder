@@ -3,7 +3,7 @@ const port_socket = 5001;
 
 const express = require('express');
 const mongojs = require('mongojs');
-const MONGO_URI = 'mongodb://localhost:27017/grabaciones';
+const MONGO_URI = 'mongodb://mongodb:27017/grabaciones';
 const db = mongojs(MONGO_URI, ['grabaciones']);
 const app = express();
 const path = require('path');

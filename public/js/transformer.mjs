@@ -2,7 +2,7 @@ import { pipeline } from '@xenova/transformers';
 import mongojs from 'mongojs';
 
 
-const MONGO_URI = 'mongodb://localhost:27017/grabaciones';
+const MONGO_URI = 'mongodb://mongodb:27017/grabaciones';
 const db = mongojs(MONGO_URI, ['grabaciones']);
 
 function transcribe(nomAudio){
