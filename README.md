@@ -40,7 +40,7 @@ Una vez clonado el repositorio de GitHub , nos movemos al directorio del reposit
 
 Asegúrate de tener Docker corriendo. 
 
-Una vez clonado el repositorio de GitHub , nos movemos al directorio del repositorio clonado y lanzamos el siguiente comando: docker compose up –d.  
+Una vez clonado el repositorio de GitHub , nos movemos al directorio del repositorio clonado y lanzamos el siguiente comando: `docker compose up –d`.  
 
 Una vez los contenedores han arrancado, la aplicación estará en marcha en el puerto 5000. 
 
