@@ -225,7 +225,7 @@ app.get('/api/play/:filename', (req, res) => {
         }
         // if found, send the audio file
         else {
-            console.log("enviando: " + doc);
+            db.grabaciones.update({ filename: doc.filename }, { $set: { accessed: Date.now() } });
             res.json(doc);
         }
     });
