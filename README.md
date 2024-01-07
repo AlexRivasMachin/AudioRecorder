@@ -27,7 +27,7 @@ Ubuntu y Debian: `sudo apt install ffmpeg`
 Fedora: `sudo dnf install ffmpeg` 
 
 #### Windows 🪟
-Descargar ffmpeg: [https://www.ffmpeg.org/download.html]([url](https://www.ffmpeg.org/download.html)) 
+Descargar ffmpeg: [https://www.ffmpeg.org/download.html](https://www.ffmpeg.org/download.html)
 
 Descargar ffmpeg mediante winget (recomendado): `winget install "FFmpeg (Essentials Build)"`
 
@@ -47,5 +47,5 @@ Una vez los contenedores han arrancado, la aplicación estará en marcha en el p
 ## Recomendaciones 📔
 Pese a funcionar en todos los navegadores, estos la soportan perfectamente:
 + Google Chrome 🌎
-+ Firefox 🦊
+x+ Firefox 🦊
 + Brave 🦁
