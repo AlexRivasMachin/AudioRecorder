@@ -265,6 +265,10 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
     });
 });
 
+app.get('/error404', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/error404.html'));
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 /**
