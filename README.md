@@ -47,5 +47,5 @@ Una vez los contenedores han arrancado, la aplicación estará en marcha en el p
 ## Recomendaciones 📔
 Pese a funcionar en todos los navegadores, estos la soportan perfectamente:
 + Google Chrome 🌎
-x+ Firefox 🦊
++ Firefox 🦊
 + Brave 🦁
