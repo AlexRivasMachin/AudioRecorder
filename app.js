@@ -225,7 +225,7 @@ app.get('/api/play/:filename', (req, res) => {
         }
         // if found, send the audio file
         else {
-            console.log("enviando: " + doc);
+            db.grabaciones.update({ filename: doc.filename }, { $set: { accessed: Date.now() } });
             res.json(doc);
         }
     });
@@ -265,6 +265,10 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
     });
 });
 
+app.get('/error404', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/error404.html'));
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 /**
@@ -275,7 +279,6 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
  */
 async function handleList(userId) {
     //en mongo date-1 es para ponerlo en orden descendente para que pille los 5 últimos :)
-    // TODO actualizar el accessed
     return new Promise((resolve, reject) => {
         let files = { files: [] };
         db.grabaciones.find({ userId: userId }).sort({ date: -1 }).limit(5, (err, docs) => {

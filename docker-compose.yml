@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: audio-recorder-mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - audio-recorder-network
+    volumes:
+      - ./mongod.conf:/etc/mongod.conf
+    command: ["mongod", "--config", "/etc/mongod.conf"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  audio-recorder:
+    image: gomezbc/audiorecorder:latest
+    container_name: audio-recorder
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    networks:
+      - audio-recorder-network
+    deploy:
+      resources:
+        limits:
+          memory: 4000m
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+networks:
+  audio-recorder-network:
+    driver: 'bridge'
+
