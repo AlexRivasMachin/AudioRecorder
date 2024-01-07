@@ -1,3 +1,6 @@
+const port = 5000;
+const port_socket = 5001;
+
 const express = require('express');
 const mongojs = require('mongojs');
 const MONGO_URI = 'mongodb://localhost:27017/grabaciones';
@@ -19,8 +22,8 @@ app.use(cors());
 const socketIO = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
-server.listen(5001, () => {
-    console.log('Servidor corriendo en puerto 5001');
+server.listen(port_socket, () => {
+    console.log('socket.io escuchando en el puerto ' + port_socket);
 });
 const io = require("socket.io")(server, {
     cors: {
@@ -30,7 +33,6 @@ const io = require("socket.io")(server, {
     }
 });
 
-const port = 5000;
 
 const maxAudioAge = 1000 * 60 * 60 * 24 * 5; // 5 dias
 const intervaloCleanup = 1000 * 60 * 60; // 1 hora
@@ -263,7 +265,7 @@ app.get('/api/delete/:filename', ensureAuthenticatedEnpoint, async (req, res,nex
     });
 });
 
-app.listen(port, () => console.log(`Listening on port 5001`));
+app.listen(port, () => console.log(`Listening on port ${port}`));
 
 /**
  * Desde la base de datos obtener los últimos 5 audios del presente usuario (id),

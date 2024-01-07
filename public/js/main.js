@@ -8,6 +8,8 @@ import audioEntry from './audioEntry.js';
 import cloudActionsButton from './cloudActionsButton.js';
 import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
 
+const puerto_socket = 5001;
+
 const timer = new Timer(document.getElementById('timer'));
 const recordedTimeDiv = document.getElementById('recorded-time');
 const recordingImg = document.getElementById('recording-img');
@@ -58,7 +60,7 @@ class App {
         this.audioPlayer = document.getElementById("audio");
         this.mediaRecorder = undefined;
         this.audioChunks = [];
-        this.socket = io("http://localhost:5001", {
+        this.socket = io(`http://localhost:${puerto_socket}`, {
             withCredentials: false,
         });
     };
@@ -67,7 +69,7 @@ class App {
         this.#getPermisosMicrofono();
         this.initAudio();
         this.setPlayModeIfNeeded();
-        this.addOnAudiosDeletedEvent();1
+        this.addOnAudiosDeletedEvent();
     };
 
     addOnAudiosDeletedEvent() {
